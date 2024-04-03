@@ -46,6 +46,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install poetry pytest
+        poetry install
     - name: Run tests
       run: poetry run pytest tests/*.py
 
@@ -60,6 +61,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install poetry pytest mutmut
+        poetry install
     - name: Run tests
       run: mutmut run --paths-to-mutate "app/" --tests-dir "tests/"
 
@@ -86,6 +88,7 @@ jobs:
   trivy:
     name: trivy/image
     runs-on: ubuntu-latest
+    needs: docker
     steps:
     - uses: actions/checkout@v4
     - name: Run Trivy vulnerability scanner
@@ -101,6 +104,7 @@ jobs:
   zaproxy:
     name: zaproxy/image
     runs-on: ubuntu-latest
+    needs: docker
     steps:
     - uses: actions/checkout@v4
     - name: ZAP Scan
