@@ -60,7 +60,7 @@ jobs:
         pip install poetry pytest mutmut
         poetry install
     - name: Run tests
-      run: mutmut run --paths-to-mutate "app/" --tests-dir "tests/"
+      run: poetry run mutmut run --paths-to-mutate "app/" --tests-dir "tests/"
 
   docker:
     name: docker/image
