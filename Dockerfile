@@ -1,5 +1,7 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
 
+RUN apt update -qqy && apt -qqy full-upgrade && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+
 WORKDIR /app
 
 # Install Poetry

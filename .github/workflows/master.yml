@@ -28,7 +28,6 @@ jobs:
           -Dsonar.projectKey=task-trackers-synchronizer
           -Dsonar.python.coverage.reportPaths=coverage.xml
           -Dsonar.sources=app/
-          -Dsonar.test.exclusions=tests/**
           -Dsonar.tests=tests/
           -Dsonar.verbose=true
       env:
