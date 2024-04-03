@@ -1,9 +1,11 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11
+
+RUN apt update -qqy && apt -qqy full-upgrade && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
 WORKDIR /app
 
 # Install Poetry
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | POETRY_HOME=/opt/poetry python && \
+RUN curl -sSL https://install.python-poetry.org/ | POETRY_HOME=/opt/poetry python && \
     cd /usr/local/bin && \
         ln -s /opt/poetry/bin/poetry && \
             poetry config virtualenvs.create false
