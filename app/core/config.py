@@ -1,5 +1,4 @@
-from pydantic import BaseSettings
-
+from pydantic_settings import BaseSettings
 
 class Config(BaseSettings):
     service_name: str = 'service_name'
