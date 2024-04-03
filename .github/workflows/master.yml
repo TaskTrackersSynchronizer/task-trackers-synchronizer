@@ -61,7 +61,6 @@ jobs:
     - name: Install dependencies
       run: |
         pip install poetry pytest mutmut
-
     - name: Run tests
       run: mutmut run --paths-to-mutate "app/" --tests-dir "tests/"
 
