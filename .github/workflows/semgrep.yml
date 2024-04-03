@@ -2,7 +2,7 @@ name: Semgrep
 
 on:
   push:
-    branches: ["master", "main"]
+    branches: ["master", "ci"]
 
 jobs:
   semgrep:
