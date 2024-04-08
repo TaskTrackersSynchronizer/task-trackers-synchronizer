@@ -12,7 +12,7 @@ jobs:
       image: returntocorp/semgrep
     steps:
       - uses: actions/checkout@v4
-      - run: semgrep --config "p/bandit" scan .
+      - run: semgrep scan --config "p/bandit" .
 
   sonarcloud:
     name: sonarcloud/sast
