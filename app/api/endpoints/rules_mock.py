@@ -51,6 +51,7 @@ def get_rules():
                 "board": "TTS",
                 "field": "Tags",
             },
+            # If source value is equal "In progress", set destination value to "Doing". Since direction is 0 (Left to right), perform sync only if source value is changed
             "condition": {
                 "direction": 0,
                 "data": {
