@@ -62,8 +62,15 @@ if __name__ == "__main__":
     gitlab_provider = GitlabProvider()
     jira_provider = JiraProvider()
 
+    data = {"description": "NEW1"}
+
     gitlab_issue = gitlab_provider.get_project_issues("KAN")[0]
+    gitlab_issue.import_values(data)
+    gitlab_issue.update()
+
     jira_issue = jira_provider.get_project_issues("KAN")[0]
+    jira_issue.import_values(data)
+    jira_issue.update()
 
     print(gitlab_issue.asdict())
     print(jira_issue.asdict())

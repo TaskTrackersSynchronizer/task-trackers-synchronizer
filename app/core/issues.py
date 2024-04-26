@@ -1,16 +1,57 @@
 from gitlab.v4.objects.issues import ProjectIssue as _GitlabIssue
 from jira import Issue as _JiraIssue
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from abc import ABC, abstractmethod
+from datetime import datetime
+from functools import reduce
+
+import typing as t
+
+_T = t.TypeVar("_T", bound=object)
 
 
 @dataclass
-class Issue:
-    issue_id: str
-    issue_name: str
-    issue_type: str
-    created_at: str
-    updated_at: str
-    description: str
+class ConvertableAttr:
+    attr: str
+    convert: t.Callable[[_T], str] = field(default=lambda x: str(x))
+    unconvert: t.Callable[[str], _T] = field(default=lambda x: str(x))
+
+    def resolve_value(self, obj: object) -> _T:
+        return reduce(getattr, [obj] + self.attr.split("."))
+
+    def resolve_type(self, obj: object) -> t.Type:
+        return type(self.resolve_value(obj))
+
+    def set_value(self, obj: object, value: object, unconvert: bool = True) -> None:
+        attr_split = self.attr.split(".")
+        attr_chain, attr_last = attr_split[:-1], attr_split[-1]
+        obj_last = reduce(getattr, [obj] + attr_chain)
+
+        value_c = self.unconvert(value) if unconvert else value
+        setattr(obj_last, attr_last, value_c)
+
+
+@dataclass
+class Issue(ABC):
+    _default_attrs = {
+        "issue_id",
+        "issue_name",
+        "created_at",
+        "updated_at",
+        "description",
+    }
+
+    def __init__(self, source: object, attrs_map: dict[str, ConvertableAttr]) -> None:
+        self._source = source
+
+        if not all(key in self._default_attrs for key in attrs_map.keys()):
+            raise ValueError("attrs_map is incomplete, please refer to _default_attrs")
+
+        self._attrs_map = attrs_map
+
+        for key in self._default_attrs:
+            c_attr = self._attrs_map[key]
+            setattr(self, key, c_attr.convert(c_attr.resolve_value(self._source)))
 
     def asdict(self) -> dict[str, str]:
         return {
@@ -21,33 +62,107 @@ class Issue:
             and not callable(getattr(value, "__get__", None))
         }
 
+    def import_values(self, data: dict[str, str], convert: bool = True) -> None:
+        if not all(key in self._default_attrs for key in data.keys()):
+            raise ValueError("data is incomplete, please refer to _default_attrs")
+
+        for key, value in data.items():
+            if convert:
+                c_attr = self._attrs_map[key]
+                setattr(self, key, c_attr.convert(value))
+            else:
+                setattr(self, key, value)
+
+    def export_values(
+        self,
+        unconvert: bool = True,
+        key_converter: t.Optional[t.Callable[[str], str]] = None,
+        exclude_fields: list[str] = None,
+    ) -> dict[str, object]:
+        data = {}
+
+        for key in self._default_attrs:
+            if exclude_fields and key in exclude_fields:
+                continue
+
+            key_c = key_converter(key) if key_converter else key
+
+            if unconvert:
+                c_attr = self._attrs_map[key]
+                data[key_c] = c_attr.unconvert(getattr(self, key))
+            else:
+                data[key_c] = getattr(self, key)
+
+        return data
+
+    @abstractmethod
+    def update(self) -> None:
+        pass
+
 
 class GitlabIssue(Issue):
-    def __init__(self, source_issue: _GitlabIssue) -> None:
-        self._source_issue = source_issue
+    def __init__(self, source: _GitlabIssue) -> None:
+        attrs_map = {
+            "issue_id": ConvertableAttr("iid", str, int),
+            "issue_name": ConvertableAttr("title"),
+            "created_at": ConvertableAttr(
+                "created_at",
+                datetime.fromisoformat,
+                lambda x: x.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            ),
+            "updated_at": ConvertableAttr(
+                "updated_at",
+                datetime.fromisoformat,
+                lambda x: x.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            ),
+            "description": ConvertableAttr("title"),
+        }
 
-        super().__init__(
-            str(source_issue.iid),
-            source_issue.title,
-            source_issue.issue_type,
-            source_issue.created_at,
-            source_issue.updated_at,
-            source_issue.description,
+        super().__init__(source, attrs_map)
+
+    def update(self) -> None:
+        data = self.export_values(
+            exclude_fields=["issue_id", "created_at", "updated_at"],
         )
+
+        for key, value in data.items():
+            c_attr = self._attrs_map[key]
+            c_attr.set_value(self._source, value)
+
+        self._source.save()
 
 
 class JiraIssue(Issue):
-    def __init__(self, source_issue: _JiraIssue) -> None:
-        self._source_issue = source_issue
+    def __init__(self, source: _JiraIssue) -> None:
+        attrs_map = {
+            "issue_id": ConvertableAttr("id"),
+            "issue_name": ConvertableAttr("fields.summary"),
+            "created_at": ConvertableAttr(
+                "fields.created",
+                lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S.%f%z"),
+                lambda x: x.strftime("%Y-%m-%dT%H:%M:%S.%f%z"),
+            ),
+            "updated_at": ConvertableAttr(
+                "fields.updated",
+                lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S.%f%z"),
+                lambda x: x.strftime("%Y-%m-%dT%H:%M:%S.%f%z"),
+            ),
+            "description": ConvertableAttr(
+                "fields.description",
+                lambda x: "" if x is None else x,
+                lambda x: None if not x else x,
+            ),
+        }
 
-        super().__init__(
-            source_issue.id,
-            source_issue.fields.summary,
-            source_issue.fields.issuetype.name.lower(),
-            source_issue.fields.created,
-            source_issue.fields.updated,
-            str(source_issue.fields.description),
+        super().__init__(source, attrs_map)
+
+    def _key_converter(self, key: str) -> str:
+        return self._attrs_map[key].attr.replace("fields.", "")
+
+    def update(self) -> None:
+        data = self.export_values(
+            key_converter=self._key_converter,
+            exclude_fields=["issue_id", "created_at", "updated_at"],
         )
 
-    def asdict(self) -> dict[str, str]:
-        return super().asdict()
+        self._source.update(fields=data)
