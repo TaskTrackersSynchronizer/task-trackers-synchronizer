@@ -90,6 +90,17 @@ every time you try to make a commit, the code will be formatted and linted for e
 
 ## Sync conditions
 
-1. New rule added
+-  New rule added
+    - rule is inserted to the DB
+    - all existing issues from the pair of issue providers are synced according to the rule
+
+
 2. Periodic script
+
+- New issue is added in one of providers -> create in another according to the set of rules where source and target providers do match
+
+- Some issue was updated (updated_at renewed) -> run Rule.sync for all rules matching synced providers
+
+---
+
 
