@@ -1,5 +1,5 @@
-import abc
 from dataclasses import dataclass
+from abc import ABC, abstractmethod
 
 from enum import Enum
 
@@ -11,24 +11,15 @@ class RuleDirection(str, Enum):
 
 
 @dataclass
-class Condition(abc.ABC):
+class Condition(ABC):
     """Interface for the sync condition"""
 
     condition_type: str = "default"
     direction: RuleDirection = RuleDirection.ANY
 
+    @abstractmethod
     def test(self) -> bool:
         return True
-
-    # mock_val = {
-    #         "type": "equality",
-    #         "data": {
-    #             "source_value": "In progress",
-    #             "destination_value": "Doing",
-    #             "direction": 0,
-    #             }
-    #         }
-    #
 
 
 @dataclass

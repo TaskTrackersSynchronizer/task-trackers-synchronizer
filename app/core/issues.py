@@ -149,7 +149,6 @@ class Issue:
 
 class GitlabIssue(Issue):
     def __init__(self, source: _GitlabIssue) -> None:
-        # print(source)
         attrs_map = {
             "issue_id": ConvertableAttr("iid", str, int),
             "issue_name": ConvertableAttr("title"),
@@ -167,11 +166,11 @@ class GitlabIssue(Issue):
             "labels": ConvertableAttr(
                 "labels",
                 # might be broken if , is used in label name
-                lambda x: x
-                if isinstance(x, list)
-                else ",".join(x)
-                if isinstance(x, str)
-                else [],
+                lambda x: (
+                    x
+                    if isinstance(x, list)
+                    else ",".join(x) if isinstance(x, str) else []
+                ),
                 lambda x: x.split(",") if x is not None else [],
             ),
         }
@@ -192,7 +191,6 @@ class GitlabIssue(Issue):
 
 class JiraIssue(Issue):
     def __init__(self, source: _JiraIssue) -> None:
-        # print(source)
         attrs_map = {
             "issue_id": ConvertableAttr("id"),
             "issue_name": ConvertableAttr("fields.summary"),
@@ -214,11 +212,11 @@ class JiraIssue(Issue):
             "labels": ConvertableAttr(
                 "fields.labels",
                 # might be broken if , is used in label name
-                lambda x: x
-                if isinstance(x, list)
-                else ",".join(x)
-                if isinstance(x, str)
-                else [],
+                lambda x: (
+                    x
+                    if isinstance(x, list)
+                    else ",".join(x) if isinstance(x, str) else []
+                ),
                 lambda x: x.split(",") if x is not None else [],
             ),
         }
