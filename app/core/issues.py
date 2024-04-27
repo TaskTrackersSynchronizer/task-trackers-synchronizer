@@ -10,6 +10,31 @@ import typing as t
 _T = t.TypeVar("_T", bound=object)
 
 
+# @dataclass
+# class MockGitlabIssue:
+#     issue_id: str
+#     issue_name: str
+#     created_at: str
+#     updated_at: str
+#     description: str
+#
+#
+# @dataclass
+# class Field:
+#
+#
+#
+# @dataclass
+# class MockJiraIssue:
+#     fields:
+#     issue_id: str
+#     issue_name: str
+#     created_at: str
+#     updated_at: str
+#     description: str
+#
+
+
 @dataclass
 class ConvertableAttr:
     attr: str
@@ -31,8 +56,26 @@ class ConvertableAttr:
         setattr(obj_last, attr_last, value_c)
 
 
+DEFAULT_ATTRS_MAP = {
+    "issue_id": ConvertableAttr("issue_id"),
+    "issue_name": ConvertableAttr("issue_name"),
+    "created_at": ConvertableAttr("created_at"),
+    "updated_at": ConvertableAttr("updated_at"),
+    "description": ConvertableAttr("description"),
+}
+
+
 @dataclass
-class Issue(ABC):
+class DefaultSource:
+    issue_id: str = "1"
+    issue_name: str = "hello world"
+    created_at: str = "2024-04-26 05:01:16"
+    updated_at: str = "2024-04-27 05:01:16"
+    description: str = "default issue"
+
+
+@dataclass
+class Issue:
     _default_attrs = {
         "issue_id",
         "issue_name",
@@ -41,15 +84,19 @@ class Issue(ABC):
         "description",
     }
 
-    def __init__(self, source: object, attrs_map: dict[str, ConvertableAttr]) -> None:
+    def __init__(
+        self,
+        source: object = DefaultSource(),
+        attrs_map: dict[str, ConvertableAttr] = DEFAULT_ATTRS_MAP,
+    ) -> None:
         self._source = source
 
-        if not all(key in self._default_attrs for key in attrs_map.keys()):
+        if not all(key in attrs_map.keys() for key in self._default_attrs):
             raise ValueError("attrs_map is incomplete, please refer to _default_attrs")
 
         self._attrs_map = attrs_map
 
-        for key in self._default_attrs:
+        for key in attrs_map:
             c_attr = self._attrs_map[key]
             setattr(self, key, c_attr.convert(c_attr.resolve_value(self._source)))
 
@@ -102,6 +149,7 @@ class Issue(ABC):
 
 class GitlabIssue(Issue):
     def __init__(self, source: _GitlabIssue) -> None:
+        # print(source)
         attrs_map = {
             "issue_id": ConvertableAttr("iid", str, int),
             "issue_name": ConvertableAttr("title"),
@@ -116,6 +164,16 @@ class GitlabIssue(Issue):
                 lambda x: x.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             ),
             "description": ConvertableAttr("title"),
+            "labels": ConvertableAttr(
+                "labels",
+                # might be broken if , is used in label name
+                lambda x: x
+                if isinstance(x, list)
+                else ",".join(x)
+                if isinstance(x, str)
+                else [],
+                lambda x: x.split(",") if x is not None else [],
+            ),
         }
 
         super().__init__(source, attrs_map)
@@ -134,6 +192,7 @@ class GitlabIssue(Issue):
 
 class JiraIssue(Issue):
     def __init__(self, source: _JiraIssue) -> None:
+        # print(source)
         attrs_map = {
             "issue_id": ConvertableAttr("id"),
             "issue_name": ConvertableAttr("fields.summary"),
@@ -151,6 +210,16 @@ class JiraIssue(Issue):
                 "fields.description",
                 lambda x: "" if x is None else x,
                 lambda x: None if not x else x,
+            ),
+            "labels": ConvertableAttr(
+                "fields.labels",
+                # might be broken if , is used in label name
+                lambda x: x
+                if isinstance(x, list)
+                else ",".join(x)
+                if isinstance(x, str)
+                else [],
+                lambda x: x.split(",") if x is not None else [],
             ),
         }
 

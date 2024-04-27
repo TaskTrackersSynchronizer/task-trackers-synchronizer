@@ -1,13 +1,15 @@
 from fastapi import APIRouter
 
 from app.core.logger import logger
+from app.core.providers import Provider, get_provider
 
 router = APIRouter()
 
 
-# TODO: return supported fields for requested task tracker / board for suggestion. In initial implementation it
-# will return only list of supported fields without types
-@router.get("/fields/")
+# Board id reserved for specific trackers which might have differnet fields per project
+@router.get("/fields/{tracker}")
 def get_fields(tracker: str, board: Optional[str]):
-    logger.info("get fields")
-    pass
+    provider: Provider = get_provider(tracker)
+    if provider is None:
+        logger.error(f"Provider {tracker} is not found")
+        return []

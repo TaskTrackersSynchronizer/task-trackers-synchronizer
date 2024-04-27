@@ -10,12 +10,13 @@ import os
 
 load_dotenv()
 
-JIRA_SERVER = os.environ.get("JIRA_SERVER", "")
-JIRA_EMAIL = os.environ.get("JIRA_EMAIL", "")
-JIRA_PAT = os.environ.get("JIRA_PAT", "")
+# mock default creds are used. TODO: parametrize
+JIRA_SERVER = os.environ.get("JIRA_SERVER", "https://0xf1o2732.atlassian.net")
+JIRA_EMAIL = os.environ.get("JIRA_EMAIL", "0xf1o2732@proton.me")
+JIRA_API_TOKEN = os.environ.get("JIRA_API_TOKEN", "")
 
-GITLAB_SERVER = os.environ.get("GITLAB_SERVER", "")
-GITLAB_PAT = os.environ.get("GITLAB_PAT", "")
+GITLAB_SERVER = os.environ.get("GITLAB_SERVER", "https://gitlab.com")
+GITLAB_API_TOKEN = os.environ.get("GITLAB_API_TOKEN", "")
 
 
 class Provider(ABC):
@@ -26,7 +27,7 @@ class Provider(ABC):
 
 class GitlabProvider(Provider):
     def __init__(self) -> None:
-        self._client = Gitlab(url=GITLAB_SERVER, oauth_token=GITLAB_PAT)
+        self._client = Gitlab(url=GITLAB_SERVER, oauth_token=GITLAB_API_TOKEN)
         self._client.auth()
 
         self._user_id = self._client.user.id
@@ -46,7 +47,7 @@ class GitlabProvider(Provider):
 
 class JiraProvider(Provider):
     def __init__(self) -> None:
-        self._client = JIRA(server=JIRA_SERVER, basic_auth=(JIRA_EMAIL, JIRA_PAT))
+        self._client = JIRA(server=JIRA_SERVER, basic_auth=(JIRA_EMAIL, JIRA_API_TOKEN))
 
     def get_project_issues(self, project_name: str) -> list[JiraIssue]:
         # validate project name
@@ -56,6 +57,16 @@ class JiraProvider(Provider):
         # TODO: handle query injection attacks more accurate
         issues = self._client.search_issues(f"project = {project_name}")
         return list(map(JiraIssue, issues))
+
+
+PROVIDERS = {
+    "gitlab": GitlabProvider(),
+    "jira": JiraProvider(),
+}
+
+
+def get_provider(name: str):
+    return PROVIDERS.get(name, None)
 
 
 if __name__ == "__main__":

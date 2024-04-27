@@ -79,3 +79,17 @@ linting and formatting as long as the pre-commit hooks were installed. We'll tal
 
 To activate pre-commit formatting and linting all you need to do is run `pre-commit install` from the root of your local git repository. Now
 every time you try to make a commit, the code will be formatted and linted for errors first.
+
+
+---
+
+# Description
+
+- [] TODO: add project description 
+
+
+## Sync conditions
+
+1. New rule added
+2. Periodic script
+

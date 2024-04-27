@@ -5,7 +5,7 @@ from app.core.logger import logger
 router = APIRouter()
 
 
-@router.get("/fields/")
+@router.get("/fields/{tracker}")
 def get_fields(tracker: str, board: Optional[str]):
     logger.info("Mock get fields")
     return [
