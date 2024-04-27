@@ -2,9 +2,9 @@
 # Might be hardcoded on frontend if necessary
 
 from typing import List
+from typing import Optional
 from fastapi import APIRouter
-
-from app.core.logger import logger
+from app.core.config import config
 
 router = APIRouter()
 
@@ -14,6 +14,5 @@ router = APIRouter()
 # BoardInfo: List[BoardField]
 # For the mock on front we can assume that initial data is present
 @router.get("/trackers/")
-def get_trackers(flat: bool = True):
-    logger.info("Mock get trackers")
-    return []
+def get_trackers(flat: Optional[bool] = True):
+    return config.trackers

@@ -10,6 +10,12 @@ def add_rule():
     return {}
 
 
+# TODO: resolve src, target trackers by rule attrs
+# @router.delete("/rules/")
+# def remove_rule(rule: Dict):
+#     return {}
+
+
 @router.get("/rules/")
 def get_rules():
     logger.info("Mock get rules")
@@ -25,6 +31,7 @@ def get_rules():
                 "board": "TTS",
                 "field": "Description",
             },
+            # default - bidirectional sync
             "condition": None,
         },
         {
@@ -53,12 +60,10 @@ def get_rules():
             },
             # If source value is equal "In progress", set destination value to "Doing". Since direction is 0 (Left to right), perform sync only if source value is changed
             "condition": {
-                "direction": 0,
-                "data": {
-                    "type": "equality",
-                    "source_value": "In progress",
-                    "destination_value": "Doing",
-                },
+                "type": "equality",
+                "source_value": "In progress",
+                "destination_value": "Doing",
+                "direction": "std",  # source to destination
             },
         },
     ]
