@@ -56,7 +56,7 @@ class JiraProvider(Provider):
             raise JIRAError("Invalid project name")
 
         # TODO: handle query injection attacks more accurate
-        issues = self._client.search_issues(f"project = {project_name}")
+        issues = self._client.search_issues(f'project = "{project_name}"')
         return list(map(JiraIssue, issues))
 
 
