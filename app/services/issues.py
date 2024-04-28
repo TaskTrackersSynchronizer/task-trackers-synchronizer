@@ -8,7 +8,7 @@ class IssuesService:
 
     # TODO: add providers
     def get_issues(self) -> list[Issue]:
-        issues_dicts: list[dict] = self._db.get("issues")
+        issues_dicts: list[dict] = self._db.get_all("issues")
         issues: list[Issue] = []
 
         for issue_dict in issues_dicts:

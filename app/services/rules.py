@@ -11,7 +11,7 @@ class RulesService:
         self._db: Database = db
 
     def get_rules(self) -> List[Rule]:
-        rules_dicts: List[Dict] = self._db.get("rules")
+        rules_dicts: List[Dict] = self._db.get_all("rules")
         rules: List[Rule] = [from_dict(x, dataclass=Rule) for x in rules_dicts]
         return rules
 
