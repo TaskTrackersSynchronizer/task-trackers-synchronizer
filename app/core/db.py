@@ -1,10 +1,6 @@
-from typing import Dict, List
-from dacite import from_dict
-from app.core.issues import GitlabIssue, JiraIssue, Issue, DefaultSource
+from app.core.issues import Issue, DefaultSource
 from abc import ABC
 from typing import Optional, Any
-from gitlab.v4.objects.issues import ProjectIssue as _GitlabIssue
-from jira import Issue as _JiraIssue
 
 
 class Database(ABC):
@@ -13,8 +9,8 @@ class Database(ABC):
         pass
 
 
-def prepare_mock_issues() -> List[Dict]:
-    issues: List[Dict] = []
+def prepare_mock_issues() -> list[dict]:
+    issues: list[dict] = []
 
     gl_source = DefaultSource(
         issue_id="1",
