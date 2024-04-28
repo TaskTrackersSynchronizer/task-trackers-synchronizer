@@ -1,38 +1,12 @@
 from gitlab.v4.objects.issues import ProjectIssue as _GitlabIssue
 from jira import Issue as _JiraIssue
 from dataclasses import dataclass, field
-from abc import ABC, abstractmethod
 from datetime import datetime
 from functools import reduce
 
 import typing as t
 
 _T = t.TypeVar("_T", bound=object)
-
-
-# @dataclass
-# class MockGitlabIssue:
-#     issue_id: str
-#     issue_name: str
-#     created_at: str
-#     updated_at: str
-#     description: str
-#
-#
-# @dataclass
-# class Field:
-#
-#
-#
-# @dataclass
-# class MockJiraIssue:
-#     fields:
-#     issue_id: str
-#     issue_name: str
-#     created_at: str
-#     updated_at: str
-#     description: str
-#
 
 
 @dataclass
@@ -142,7 +116,6 @@ class Issue:
 
         return data
 
-    @abstractmethod
     def update(self) -> None:
         pass
 
@@ -162,7 +135,7 @@ class GitlabIssue(Issue):
                 datetime.fromisoformat,
                 lambda x: x.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             ),
-            "description": ConvertableAttr("title"),
+            "description": ConvertableAttr("description"),
             "labels": ConvertableAttr(
                 "labels",
                 # might be broken if , is used in label name
