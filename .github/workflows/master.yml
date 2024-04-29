@@ -138,7 +138,7 @@ jobs:
       - run: echo 0
 
   unit-test:
-    name: pytest/test
+    name: pytest/unit
     runs-on: ubuntu-latest
     steps:
       - run: echo 0
@@ -148,25 +148,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo 0
-    # - uses: actions/checkout@v4
-    # - uses: actions/setup-python@v5
-    #   with:
-    #     python-version: "3.11"
-    # - name: Install dependencies
-    #   run: |
-    #     pip install poetry pytest mutmut
-    #     poetry install
-    # - name: Run tests
-    #   run: poetry run mutmut run --paths-to-mutate "app/" --tests-dir "tests/"
 
   integration-test:
-    name: pytest/test
+    name: pytest/integration
     runs-on: ubuntu-latest
     steps:
       - run: echo 0
 
   e2e-test:
-    name: pytest/test
+    name: pytest/e2e
     runs-on: ubuntu-latest
     steps:
       - run: echo 0
