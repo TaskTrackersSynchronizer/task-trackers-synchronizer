@@ -1,15 +1,15 @@
 from app.services.issues import IssuesService
-from collections import defaultdict
 from app.services.rules import RulesService
 from app.core.rule import Rule
 from app.core.issues import Issue
 from app.core.providers import get_provider
 from app.core.db import DocumentDatabase
-from itertools import groupby
 from datetime import datetime
-from app.core.providers import JiraProvider, GitlabProvider, Provider
-from dataclasses import dataclass
+from app.core.providers import Provider
+from dataclasses import dataclass, field
 from typing import Optional
+from app.core.logger import logger
+from collections import defaultdict
 
 
 @dataclass
@@ -24,9 +24,9 @@ class ProjectNamePair:
     dst_project: str
     src_provider: Provider
     dst_provider: Provider
-    rules: list[Rule]
-    issues: list[Issue]
-    
+    rules: list[Rule] = field(default_factory=list)
+    issues: list[Issue] = field(default_factory=list)
+
 
 class Syncer:
     def __init__(self, db: DocumentDatabase) -> None:
@@ -48,21 +48,20 @@ class Syncer:
     ) -> list[ProjectNamePair]:
         relevant_projects: list[ProjectNamePair] = []
         projects_dict: dict[tuple[str, str], list[Rule]] = defaultdict(list)
+
+        logger.debug(f"get_project_name_pairs_from_rules rules: {rules}")
+        logger.debug(
+            f"get_project_name_pairs_from_rules src_tracker: {src_tracker}, dst_tracler: {dst_tracker}"
+        )
         rule: Rule
-        # print(
-        #     f"get_project_name_pairs_from_rule: src_tracker: {src_tracker}, dst_tracker: {dst_tracker}"
-        # )
         for rule in rules:
-            print(rule)
-            # print(
-            #         f"rule: src_tracker: {rule.source.tracker}, dst_tracker: {rule.destination.tracker}, src_board: {rule.}"
-            # )
             if (
                 rule.source.tracker.lower() == src_tracker.lower()
                 and rule.destination.tracker.lower() == dst_tracker.lower()
             ):
                 projects_dict[(rule.source.board, rule.destination.board)].append(rule)
 
+        logger.info(projects_dict)
         for projects_pair, rules in projects_dict.items():
             relevant_projects.append(
                 ProjectNamePair(
@@ -76,19 +75,26 @@ class Syncer:
 
         return relevant_projects
 
-    def handle_updated_issues(
-        self, projects: ProjectNamePair, updated_issues: list[Issue]
-    ):
-        for rule in projects.rules:
-            for issue in updated_issues:
+    # - We assume that script runs quick enough so issue is updated only at one side
+    # - We assume that issues between two projects within same provider are not synced
+    # - We assume that there can be only one related issue in a pair of two  project providers
+    def handle_updated_issues(self, projects_pairs: ProjectNamePair):
+        projects_pairs.issues.sort(key=lambda x: x.updated_at)
+        assert len(projects_pairs.issues) > 0
+        assert len(projects_pairs.rules) > 0
+        for rule in projects_pairs.rules:
+            for issue in projects_pairs.issues:
                 # TODO: make database issue provider
                 # TODO: fetch local
+
+                # TODO: for each issue keep set of related ids
                 related_issue: Optional[Issue] = self.issues_svc.get_related_issue(
-                    issue, projects.dst_provider
+                    issue, rule.destination.board, projects_pairs.dst_provider
                 )
                 if related_issue is None:
                     # related issue didn't exist
                     # creation is needed
+                    assert False
                     pass
                 else:
                     rule.sync(issue, related_issue)
@@ -97,52 +103,50 @@ class Syncer:
 
     def sync_all(self) -> None:
         # TODO: parametrize list of providers
-        # jira_issues = self.jira_provider.get_last_updated_issues(self.updated_at)
-        # gitlab_issues = self.gitlab_provider.get_last_updated_issues(self.updated_at)
 
         # TODO: order source and target
         rules: list[Rule] = self.rules_svc.get_rules()
 
-        # TODO: parametrize unique increasingly ordered pairs of providers
-        ordered_providers: list[str] = [("Gitlab", "Jira")]
+        # TODO: parametrize unique pairs of providers
+        ordered_providers: list[str] = [("gitlab", "jira")]
 
         # TODO: ensure that all pairs are ordered
         for providers_pair in ordered_providers:
-            src_provider: Provider = get_provider(providers_pair[0])
-            dst_provider: Provider = get_provider(providers_pair[1])
-            assert src_provider is not None
-            assert dst_provider is not None
+            # src_provider: Provider = get_provider(providers_pair[0])
+            # dst_provider: Provider = get_provider(providers_pair[1])
             projects_pairs: list[
                 ProjectNamePair
             ] = self.get_project_name_pairs_from_rules(
                 rules, providers_pair[0], providers_pair[1]
             )
 
-            # for pp in projects_pairs:
-            #     if pp.src_project 
+            for projects_pair in projects_pairs:
+                projects_pair.issues += projects_pair.src_provider.get_project_issues(
+                    projects_pair.src_project, updated_at=self.updated_at
+                )
 
+                projects_pair.issues += projects_pair.dst_provider.get_project_issues(
+                    projects_pair.dst_project, updated_at=self.updated_at
+                )
+
+                self.handle_updated_issues(projects_pair)
             # src_issues = src_provider.get_last_updated_issues(self.updated_at)
             # dst_issues = dst_provider.get_last_updated_issues(self.updated_at)
-            # 1. group by rules
-            
-            src_project_issues = []
-            dst_project_issues = []
-            # for proj_name, issues in groupby(src_issues, lambda x: x[0]):
-            #     for thing in group:
-            #         print("A %s is a %s." % (thing[1], key))
-            
-            src_project_issues = src_issues.
-
-            recently_updated_issues = src_issues + dst_issues
-
-            # assuming source and target projects are defined
-            # assumed that
-            # out: List[issues]
-
-        # for _, group in groupby(issues, key=lambda x: x.issue_name):
-        #     src, dest = group[0], group[1]
-        #
-        #     for rule in rules:
-        #         rule.sync(src, dest)
+            # recently_updated_issues = src_issues + dst_issues
 
         self.updated_at = datetime.now()
+
+    def sync_minimal(self, src_issues: list[Issue], dst_issues: list[Issue]) -> None:
+        mappings = {
+            src.issue_name: [src, dst]
+            for src in src_issues
+            for dst in dst_issues
+            if src.issue_name == dst.issue_name
+        }
+
+        print(src_issues, dst_issues)
+        print(mappings)
+
+        for src_issue, dst_issue in mappings.values():
+            for rule in self.rules_svc.get_rules():
+                rule.sync(src_issue, dst_issue)

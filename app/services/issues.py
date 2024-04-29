@@ -1,6 +1,7 @@
 from app.core.db import Database
 from app.core.issues import Issue
 from app.core.providers import Provider
+from app.core.logger import logger
 from typing import Optional
 
 
@@ -22,12 +23,13 @@ class IssuesService:
         return issues
 
     def get_related_issue(
-        self, issue: Issue, target_provider: Provider
+        self, issue: Issue, target_project_name: str, target_provider: Provider
     ) -> Optional[Issue]:
         # TODO: fetch from db if possible
         # TODO: change to ids
-        related_issue: Optional[Issue] = target_provider.get_issue_by_name(
-            issue.issue_name
+        logger.debug(f"fetching related issue: t_project: {target_project_name}")
+        related_issue: Optional[Issue] = target_provider.get_project_issue_by_name(
+            target_project_name, issue.issue_name
         )
         return related_issue
 
