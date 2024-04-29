@@ -1,3 +1,17 @@
+FROM node:22.0 AS FRONTEND-BUILDER
+
+WORKDIR /build
+
+COPY ./frontend/package.json /build
+
+RUN npm install
+
+COPY ./frontend /build
+
+RUN mkdir dist
+
+RUN npm run build
+
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11
 
 RUN apt update -qqy && apt -qqy full-upgrade && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
@@ -17,5 +31,10 @@ ARG INSTALL_DEV=false
 RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install --no-root ; else poetry install --no-root --no-dev ; fi"
 
 COPY ./app /app/app
+
+COPY --from=FRONTEND-BUILDER /build/dist/ /app/static
+COPY --from=FRONTEND-BUILDER /build/public/ /app/static
+
+ENV STATIC_RESOURCES=/app/static
 ENV VARIABLE_NAME=api
 ENV PYTHONPATH=/api
