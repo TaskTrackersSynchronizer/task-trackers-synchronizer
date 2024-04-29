@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from functools import reduce
 
+
 import typing as t
 
 _T = t.TypeVar("_T", bound=object)
@@ -77,9 +78,7 @@ class Issue:
 
         for key in attrs_map:
             c_attr = self._attrs_map[key]
-            setattr(
-                self, key, c_attr.convert(c_attr.resolve_value(self._source))
-            )
+            setattr(self, key, c_attr.convert(c_attr.resolve_value(self._source)))
 
     def asdict(self) -> dict[str, str]:
         return {
@@ -89,6 +88,35 @@ class Issue:
             and not callable(value)
             and not callable(getattr(value, "__get__", None))
         }
+
+    @staticmethod
+    def filter_related(
+        src_issues: list["Issue"], dst_issues: list["Issue"]
+    ) -> list["IssuePair"]:
+        related_pairs: list["IssuePair"] = []
+        for src_issue in src_issues:
+            related_issues = [x for x in dst_issues if x.id_field == src_issue.id_field]
+            if related_issues:
+                related_pairs.append(IssuePair(src_issue, related_issues[0]))
+
+        return related_pairs
+
+    @property
+    def id_field(self) -> str:
+        return "issue_name"
+
+    def is_synced(self, other: "Issue") -> bool:
+        try:
+            other_values = other.export_values(unconvert=False)
+            for field, value in self.export_values(unconvert=False).items():
+                if other_values[field] != value:
+                    return False
+            return True
+        except Exception:
+            return False
+
+    def is_related(self, other: "Issue") -> bool:
+        return self.id_field == other.id_field
 
     def import_values(
         self,
@@ -153,7 +181,9 @@ class GitlabIssue(Issue):
                 lambda x: (
                     x
                     if isinstance(x, list)
-                    else ",".join(x) if isinstance(x, str) else []
+                    else ",".join(x)
+                    if isinstance(x, str)
+                    else []
                 ),
                 lambda x: x.split(",") if x is not None else [],
             ),
@@ -199,7 +229,9 @@ class JiraIssue(Issue):
                 lambda x: (
                     x
                     if isinstance(x, list)
-                    else ",".join(x) if isinstance(x, str) else []
+                    else ",".join(x)
+                    if isinstance(x, str)
+                    else []
                 ),
                 lambda x: x.split(",") if x is not None else [],
             ),
@@ -217,3 +249,9 @@ class JiraIssue(Issue):
         )
 
         self._source.update(fields=data)
+
+
+@dataclass
+class IssuePair:
+    src: Issue
+    dst: Issue

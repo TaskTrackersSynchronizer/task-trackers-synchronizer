@@ -1,7 +1,10 @@
 from app.core.issues import Issue, DefaultSource
+from app.core.providers import PROVIDER_NAMES
 from abc import ABC, abstractmethod
 from functools import reduce
 from copy import deepcopy
+from dataclasses import asdict
+from app.core.rule import Rule, RuleSide
 
 import sqlite3
 import json
@@ -45,7 +48,7 @@ class DocumentDatabase(Database):
     TABLES: dict[str, str] = {
         "issues": "issues",
         "rules": "rules",
-    }
+    } | {x: x for x in PROVIDER_NAMES}
 
     def __init__(self, f: str):
         """
@@ -159,7 +162,10 @@ class DocumentDatabase(Database):
 
 class MockDatabase(Database):
     def __init__(self):
-        self._db = {"issues": self.prepare_mock_issues()}
+        self._db = {
+            "issues": self.prepare_mock_issues(),
+            "rules": self.prepare_mock_rules(),
+        }
 
     def get_all(self, table_name: str = "issues") -> list[dict]:
         return [deepcopy(x) for x in self._db[table_name]]
@@ -175,6 +181,18 @@ class MockDatabase(Database):
 
     def close(self):
         raise NotImplementedError()
+
+    @staticmethod
+    def prepare_mock_rules() -> list[dict]:
+        return [
+            asdict(x)
+            for x in [
+                Rule(
+                    RuleSide("Jira", "KAN", "description"),
+                    RuleSide("Gitlab", "KAN", "description"),
+                )
+            ]
+        ]
 
     @staticmethod
     def prepare_mock_issues() -> list[dict]:

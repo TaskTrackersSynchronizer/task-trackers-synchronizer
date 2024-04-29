@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from gitlab import Gitlab, GitlabError
 from jira import JIRA, JIRAError
 from dotenv import load_dotenv
+from datetime import datetime
 
 from app.core.issues import Issue, JiraIssue, GitlabIssue
 
@@ -25,6 +26,10 @@ class Provider(ABC):
     def get_project_issues(self, project_name: str) -> list[Issue]:
         pass
 
+    @abstractmethod
+    def get_last_updated_issues(self, updated_at: datetime) -> list[Issue]:
+        pass
+
 
 class GitlabProvider(Provider):
     def __init__(self) -> None:
@@ -32,13 +37,12 @@ class GitlabProvider(Provider):
         self._client.auth()
 
         self._user_id = self._client.user.id
+        self._issues_api = self._client.issues
         self._user = self._client.users.get(self._user_id)
 
     def get_project_issues(self, project_name: str) -> list[GitlabIssue]:
         user_projects = self._user.projects.list(pagination=False)
-        user_project = next(
-            filter(lambda x: x.name == project_name, user_projects)
-        )
+        user_project = next(filter(lambda x: x.name == project_name, user_projects))
 
         if not user_project:
             raise GitlabError("Gitlab project not found")
@@ -47,27 +51,56 @@ class GitlabProvider(Provider):
         issues = project.issues.list(pagination=False)
         return list(map(GitlabIssue, issues))
 
+    def get_last_updated_issues(
+        self, updated_at: datetime = datetime.fromtimestamp(0)
+    ) -> list[GitlabIssue]:
+        user_projects = self._user.projects.list(pagination=False)
+        # user_project = next(filter(lambda x: x.name == project_name, user_projects))
+        issues: list[GitlabIssue] = []
+        for project in user_projects:
+            project = self._client.projects.get(project.id)
+            updated_at_str = datetime.isoformat(updated_at)
+            project_issues = project.issues.list(
+                pagination=False, updated_after=updated_at_str
+            )
+            issues += project_issues
+
+        return list(map(GitlabIssue, issues))
+
+    def get_issues(self, query: str = "") -> list[GitlabIssue]:
+        # TODO: refactor this shit somebody if you care
+        return self.get_last_updated_issues()
+
 
 class JiraProvider(Provider):
     def __init__(self) -> None:
-        self._client = JIRA(
-            server=JIRA_SERVER, basic_auth=(JIRA_EMAIL, JIRA_API_TOKEN)
-        )
+        self._client = JIRA(server=JIRA_SERVER, basic_auth=(JIRA_EMAIL, JIRA_API_TOKEN))
 
+    def get_issues(self, query: str = "") -> list[JiraIssue]:
+        issues = self._client.search_issues(query)
+        return list(map(JiraIssue, issues))
+
+    # todo: allow fetching from list of projects
     def get_project_issues(self, project_name: str) -> list[JiraIssue]:
         # validate project name
         if not re.fullmatch(r"\w{2,80}", project_name):
             raise JIRAError("Invalid project name")
 
         # TODO: handle query injection attacks more accurate
-        issues = self._client.search_issues(f'project = "{project_name}"')
-        return list(map(JiraIssue, issues))
+        issues = self.get_issues(f'project = "{project_name}"')
+        return issues
+
+    def get_last_updated_issues(self, updated_at: datetime) -> list[JiraIssue]:
+        updated_at_str = updated_at.strftime("%Y-%m-%d %H:%M")
+
+        return self.get_issues(f"updated>='{updated_at_str}'")
 
 
 PROVIDERS = {
     "gitlab": GitlabProvider(),
     "jira": JiraProvider(),
 }
+PROVIDER_NAMES = [x for x in PROVIDERS]
 
 
 def get_provider(name: str) -> t.Optional[Provider]:

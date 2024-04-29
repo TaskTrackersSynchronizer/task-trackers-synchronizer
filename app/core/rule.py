@@ -14,7 +14,7 @@ class SyncError(RuntimeError):
 @dataclass
 class RuleSide:
     tracker: str
-    board: str
+    project: str
     field: str
 
 
