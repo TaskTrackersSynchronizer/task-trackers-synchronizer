@@ -8,6 +8,7 @@ def init_document_db() -> DocumentDatabase:
     db = DocumentDatabase(":memory:")
     return db
 
+
 @pytest.mark.unit
 def test_document_db_add_single_row(init_document_db: DocumentDatabase):
     """
@@ -19,6 +20,7 @@ def test_document_db_add_single_row(init_document_db: DocumentDatabase):
     db_stored_issues = db.get_all("issues")
     assert len(db_stored_issues) == 1, "Unexpected number of rows in the table"
     assert db_stored_issues[0] == issue, "DB and original issues do not match"
+
 
 @pytest.mark.unit
 def test_document_db_add_multiple_rows_rowwise(

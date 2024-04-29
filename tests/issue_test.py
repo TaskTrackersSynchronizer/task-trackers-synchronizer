@@ -2,9 +2,9 @@ from app.core.providers import Provider, get_provider, PROVIDER_NAMES
 from app.core.issues import DEFAULT_ATTRS_MAP
 import pytest
 from datetime import datetime
-import typing as t
 
 BOARD_NAME = "KAN"
+
 
 @pytest.mark.integration
 @pytest.mark.parametrize("provider", PROVIDER_NAMES)
@@ -23,6 +23,7 @@ def test_issue_creation(provider):
 @pytest.mark.parametrize("provider", PROVIDER_NAMES)
 def test_issue_update(provider):
     provider = get_provider(provider)
+
     def get_description(text: str) -> str:
         return text + text if len(text) < 16 else "text"
 

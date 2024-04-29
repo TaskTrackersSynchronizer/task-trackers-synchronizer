@@ -5,6 +5,7 @@ from app.core.db import MockDatabase
 from app.core.providers import get_provider
 import pytest
 
+
 @pytest.mark.integration
 def test_syncs_existing():
     # TODO: backup all existing
@@ -42,6 +43,7 @@ def test_syncs_existing():
     # 4. assert that fields are synced
     # 5. import old values to the issues
     # 6. update issues to contain old values
+
 
 @pytest.mark.integration
 def test_sync_minimal():

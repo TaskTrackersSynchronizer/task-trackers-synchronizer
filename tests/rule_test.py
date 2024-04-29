@@ -5,6 +5,7 @@ from app.services.issues import IssuesService
 from app.core.condition import FieldEqualityCondition, RuleDirection
 import pytest
 
+
 @pytest.mark.unit
 def test_bidirectional_sync():
     db = MockDatabase()

@@ -114,6 +114,7 @@ class Syncer:
 
             src_issues = src_provider.get_last_updated_issues(self.updated_at)
             dst_issues = dst_provider.get_last_updated_issues(self.updated_at)
-            recently_updated_issues = src_issues + dst_issues
+            # FIXME line below commented out to satisfy the linter. consider the need for this
+            # recently_updated_issues = src_issues + dst_issues
 
         self.updated_at = datetime.now()

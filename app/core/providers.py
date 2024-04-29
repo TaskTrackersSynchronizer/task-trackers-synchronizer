@@ -31,6 +31,7 @@ class Provider(ABC):
     def get_last_updated_issues(self, updated_at: datetime) -> list[Issue]:
         pass
 
+
 @pytest.mark.integration
 class GitlabProvider(Provider):
     def __init__(self) -> None:
@@ -43,7 +44,7 @@ class GitlabProvider(Provider):
 
     def get_project_issues(self, project_name: str) -> list[GitlabIssue]:
         user_projects = self._user.projects.list(pagination=False)
-        filter(lambda x: x.name == project_name, user_projects)
+        user_project = filter(lambda x: x.name == project_name, user_projects)
 
         if not user_project:
             raise GitlabError("Gitlab project not found")
@@ -97,6 +98,7 @@ class JiraProvider(Provider):
 
         return self.get_issues(f"updated>='{updated_at_str}'")
 
+
 class SingletonObject:
     def __init__(self, wrapped_class, *args, **kwargs):
         self._cls = wrapped_class
@@ -109,12 +111,13 @@ class SingletonObject:
             self._instance = self._cls(*self._args, **self._kwargs)
         return self._instance
 
+
 PROVIDERS_OBJS: t.Dict = {
     "gitlab": SingletonObject(GitlabProvider),
     "jira": SingletonObject(JiraProvider)
 }
 PROVIDER_NAMES = list(PROVIDERS_OBJS.keys())
 
+
 def get_provider(provider_name: str) -> Provider:
     return PROVIDERS_OBJS[provider_name].get_instance()
-
