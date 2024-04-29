@@ -15,7 +15,11 @@ def create_api():
 
     # api.include_router(hello.router)
 
-    api.mount("/", StaticFiles(directory=static_resources_path, html=True), name="static")
+    api.mount(
+        "/",
+        StaticFiles(directory=static_resources_path, html=True),
+        name="static",
+    )
     return api
 
 
@@ -26,6 +30,10 @@ def create_mock_api() -> FastAPI:
     api.include_router(fields_mock.router)
     api.include_router(rules_mock.router)
     api.include_router(trackers_mock.router)
-    api.mount("/", StaticFiles(directory=static_resources_path, html=True), name="static")
+    api.mount(
+        "/",
+        StaticFiles(directory=static_resources_path, html=True),
+        name="static",
+    )
 
     return api

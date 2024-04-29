@@ -53,9 +53,9 @@ class Syncer:
                 rule.source.tracker == get_provider(src_tracker)
                 and rule.destination.tracker == src_tracker
             ):
-                projects_dict[(rule.source.project, rule.destination.project)].append(
-                    rule
-                )
+                projects_dict[
+                    (rule.source.project, rule.destination.project)
+                ].append(rule)
 
         for projects_pair, rules in projects_dict.items():
             relevant_projects.append(
@@ -77,8 +77,10 @@ class Syncer:
             for issue in updated_issues:
                 # TODO: make database issue provider
                 # TODO: fetch local
-                related_issue: Optional[Issue] = self.issues_svc.get_related_issue(
-                    issue, projects.dst_provider
+                related_issue: Optional[Issue] = (
+                    self.issues_svc.get_related_issue(
+                        issue, projects.dst_provider
+                    )
                 )
                 if related_issue is None:
                     # related issue didn't exist
@@ -104,10 +106,10 @@ class Syncer:
         for providers_pair in ordered_providers:
             src_provider: Provider = get_provider(providers_pair[0])
             dst_provider: Provider = get_provider(providers_pair[1])
-            projects_pairs: list[
-                ProjectNamePair
-            ] = self.get_project_name_pairs_from_rules(
-                rules, src_provider, dst_provider
+            projects_pairs: list[ProjectNamePair] = (
+                self.get_project_name_pairs_from_rules(
+                    rules, src_provider, dst_provider
+                )
             )
 
             for projects_pair in projects_pairs:

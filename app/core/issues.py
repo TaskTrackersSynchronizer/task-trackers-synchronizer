@@ -78,7 +78,9 @@ class Issue:
 
         for key in attrs_map:
             c_attr = self._attrs_map[key]
-            setattr(self, key, c_attr.convert(c_attr.resolve_value(self._source)))
+            setattr(
+                self, key, c_attr.convert(c_attr.resolve_value(self._source))
+            )
 
     def asdict(self) -> dict[str, str]:
         return {
@@ -95,7 +97,9 @@ class Issue:
     ) -> list["IssuePair"]:
         related_pairs: list["IssuePair"] = []
         for src_issue in src_issues:
-            related_issues = [x for x in dst_issues if x.id_field == src_issue.id_field]
+            related_issues = [
+                x for x in dst_issues if x.id_field == src_issue.id_field
+            ]
             if related_issues:
                 related_pairs.append(IssuePair(src_issue, related_issues[0]))
 
@@ -181,9 +185,7 @@ class GitlabIssue(Issue):
                 lambda x: (
                     x
                     if isinstance(x, list)
-                    else ",".join(x)
-                    if isinstance(x, str)
-                    else []
+                    else ",".join(x) if isinstance(x, str) else []
                 ),
                 lambda x: x.split(",") if x is not None else [],
             ),
@@ -229,9 +231,7 @@ class JiraIssue(Issue):
                 lambda x: (
                     x
                     if isinstance(x, list)
-                    else ",".join(x)
-                    if isinstance(x, str)
-                    else []
+                    else ",".join(x) if isinstance(x, str) else []
                 ),
                 lambda x: x.split(",") if x is not None else [],
             ),

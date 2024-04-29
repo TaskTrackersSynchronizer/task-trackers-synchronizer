@@ -18,7 +18,9 @@ def test_syncs_existing():
     jira_issues: list[JiraIssue] = jira_provider.get_issues("")
     gitlab_issues: list[GitlabIssue] = gitlab_provider.get_issues("")
 
-    related_issues: list[IssuePair] = Issue.filter_related(jira_issues, gitlab_issues)
+    related_issues: list[IssuePair] = Issue.filter_related(
+        jira_issues, gitlab_issues
+    )
     unsynced_issues = [x for x in related_issues if not x.src.is_synced(x.dst)]
     # i for i in issues if i.id_field not in map(lambda x: x.id_field, issues)
 
@@ -29,7 +31,9 @@ def test_syncs_existing():
     jira_issues: list[JiraIssue] = jira_provider.get_issues()
     gitlab_issues: list[GitlabIssue] = gitlab_provider.get_issues()
 
-    related_issues: list[IssuePair] = Issue.filter_related(jira_issues, gitlab_issues)
+    related_issues: list[IssuePair] = Issue.filter_related(
+        jira_issues, gitlab_issues
+    )
     unsynced_issues = [x for x in related_issues if not x.src.is_synced(x.dst)]
 
     assert len(unsynced_issues) == 0
