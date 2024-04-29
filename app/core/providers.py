@@ -57,7 +57,6 @@ class GitlabProvider(Provider):
         self, updated_at: datetime = datetime.fromtimestamp(0)
     ) -> list[GitlabIssue]:
         user_projects = self._user.projects.list(pagination=False)
-        # user_project = next(filter(lambda x: x.name == project_name, user_projects))
         issues: list[GitlabIssue] = []
         for project in user_projects:
             project = self._client.projects.get(project.id)

@@ -4,9 +4,8 @@ from app.core.rule import Rule
 from app.core.issues import Issue
 from app.core.providers import get_provider
 from app.core.db import DocumentDatabase
-from itertools import groupby
 from datetime import datetime
-from app.core.providers import JiraProvider, GitlabProvider, Provider
+from app.core.providers import Provider
 from dataclasses import dataclass
 from typing import Optional
 
@@ -93,8 +92,6 @@ class Syncer:
 
     def sync_all(self) -> None:
         # TODO: parametrize list of providers
-        # jira_issues = self.jira_provider.get_last_updated_issues(self.updated_at)
-        # gitlab_issues = self.gitlab_provider.get_last_updated_issues(self.updated_at)
 
         # TODO: order source and target
         rules: list[Rule] = self.rules_svc.get_rules()
@@ -118,15 +115,5 @@ class Syncer:
             src_issues = src_provider.get_last_updated_issues(self.updated_at)
             dst_issues = dst_provider.get_last_updated_issues(self.updated_at)
             recently_updated_issues = src_issues + dst_issues
-
-            # assuming source and target projects are defined
-            # assumed that
-            # out: List[issues]
-
-        # for _, group in groupby(issues, key=lambda x: x.issue_name):
-        #     src, dest = group[0], group[1]
-        #
-        #     for rule in rules:
-        #         rule.sync(src, dest)
 
         self.updated_at = datetime.now()

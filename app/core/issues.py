@@ -112,8 +112,8 @@ class Issue:
     def is_synced(self, other: "Issue") -> bool:
         try:
             other_values = other.export_values(unconvert=False)
-            for field, value in self.export_values(unconvert=False).items():
-                if other_values[field] != value:
+            for f, value in self.export_values(unconvert=False).items():
+                if other_values[f] != value:
                     return False
             return True
         except Exception:

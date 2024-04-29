@@ -1,4 +1,4 @@
-from app.core.providers import get_provider, JiraProvider
+from app.core.providers import get_provider, JiraProvider, GitlabProvider
 from app.core.issues import DEFAULT_ATTRS_MAP
 import pytest
 from datetime import datetime
@@ -48,12 +48,9 @@ def test_issue_update(provider):
 
 def test_jira_get_last_updated_at():
     provider: JiraProvider = get_provider("jira")
-    last_updated = ""
 
     updated_at_str = "2021-04-28T10:15:30.123456+0530"
     updated_at = datetime.strptime(updated_at_str, "%Y-%m-%dT%H:%M:%S.%f%z")
-
-    # print(tmp)
 
     issues = provider.get_last_updated_issues(updated_at)
 
@@ -69,8 +66,3 @@ def test_gitlab_get_last_updated_at():
     issues = provider.get_last_updated_issues(updated_at)
 
     print(f"issues: {issues} size: {len(issues)}")
-
-    # updated_at: str = "2024-04-27 05:01:16"
-
-
-# def test_gitlab_get_last_updated_at
