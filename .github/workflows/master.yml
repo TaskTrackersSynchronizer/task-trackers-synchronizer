@@ -181,7 +181,7 @@ jobs:
     # - name: Run tests
     #   run: poetry run mutmut run --paths-to-mutate "app/" --tests-dir "tests/"
 
-    integration-test:
+  integration-test:
     name: pytest/test
     runs-on: ubuntu-latest
     steps:
