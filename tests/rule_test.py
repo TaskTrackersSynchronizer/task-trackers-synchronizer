@@ -3,8 +3,9 @@ from app.core.rule import Rule, RuleSide
 from app.core.db import MockDatabase
 from app.services.issues import IssuesService
 from app.core.condition import FieldEqualityCondition, RuleDirection
+import pytest
 
-
+@pytest.mark.unit
 def test_bidirectional_sync():
     db = MockDatabase()
     issues_svc: IssuesService = IssuesService(db)
@@ -36,6 +37,7 @@ def test_bidirectional_sync():
     assert gitlab_issue.description == jira_issue.description
 
 
+@pytest.mark.unit
 def test_src_to_dest_sync():
     db = MockDatabase()
     issues_svc: IssuesService = IssuesService(db)
@@ -71,6 +73,7 @@ def test_src_to_dest_sync():
     assert gitlab_issue.description == jira_issue.description
 
 
+@pytest.mark.unit
 def test_dest_to_src_sync():
     db = MockDatabase()
     issues_svc: IssuesService = IssuesService(db)
