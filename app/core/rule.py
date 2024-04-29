@@ -14,7 +14,7 @@ class SyncError(RuntimeError):
 @dataclass
 class RuleSide:
     tracker: str
-    project: str
+    board: str
     field: str
 
 
@@ -50,6 +50,7 @@ class Rule:
                 getattr(newer, self.destination.field),
             )
 
+            older.update()
         elif self.condition.direction == RuleDirection.SRC_TO_DEST:
             setattr(
                 dst_issue,
@@ -62,6 +63,7 @@ class Rule:
                 self.source.field,
                 getattr(dst_issue, self.destination.field),
             )
+
         else:
             raise SyncError("Unable to resolve sync rule")
 
