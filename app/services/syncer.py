@@ -8,6 +8,7 @@ from datetime import datetime
 from app.core.providers import Provider
 from dataclasses import dataclass
 from typing import Optional
+import typing as t
 
 
 @dataclass
@@ -97,7 +98,7 @@ class Syncer:
         rules: list[Rule] = self.rules_svc.get_rules()
 
         # TODO: parametrize unique pairs of providers
-        ordered_providers: list[str] = [("jira", "gitlab")]
+        ordered_providers: t.List[t.Tuple[str]] = [("jira", "gitlab")]
 
         # TODO: ensure that all pairs are ordered
         for providers_pair in ordered_providers:
@@ -112,9 +113,12 @@ class Syncer:
             for projects_pair in projects_pairs:
                 self.sync_projects(projects_pair.src, projects_pair.dst)
 
-            src_issues = src_provider.get_last_updated_issues(self.updated_at)
-            dst_issues = dst_provider.get_last_updated_issues(self.updated_at)
-            # FIXME line below commented out to satisfy the linter. consider the need for this
+            # FIXME lines below commented out to satisfy the linter.
+            # reconsider the need for them.
+            # src_issues = src_provider.get_last_updated_issues(
+            #        self.updated_at)
+            # dst_issues = dst_provider.get_last_updated_issues(
+            #        self.updated_at)
             # recently_updated_issues = src_issues + dst_issues
 
         self.updated_at = datetime.now()
