@@ -52,6 +52,7 @@ class Rule:
             )
 
             older.update()
+        # TODO: handle condition testing
         elif self.condition.direction == RuleDirection.SRC_TO_DEST:
             setattr(
                 dst_issue,
