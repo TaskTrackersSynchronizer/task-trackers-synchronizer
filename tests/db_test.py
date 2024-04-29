@@ -1,5 +1,4 @@
 from app.core.db import DocumentDatabase, MockDatabase
-from app.services.issues import Issue
 from typing import List, Dict
 import pytest
 
@@ -22,7 +21,9 @@ def test_document_db_add_single_row(init_document_db: DocumentDatabase):
     assert db_stored_issues[0] == issue, "DB and original issues do not match"
 
 
-def test_document_db_add_multiple_rows_rowwise(init_document_db: DocumentDatabase):
+def test_document_db_add_multiple_rows_rowwise(
+    init_document_db: DocumentDatabase,
+):
     """
     Test adding a single row to the database
     """
@@ -39,7 +40,7 @@ def test_document_db_add_multiple_rows_rowwise(init_document_db: DocumentDatabas
     ), "DB and original issues do not match"
 
 
-def test_document_db_add_multiple_rows_bulk(init_document_db: DocumentDatabase):
+def test_document_db_add_all_rows(init_document_db: DocumentDatabase):
     """
     Test adding multiple rows to the database in bulk
     """

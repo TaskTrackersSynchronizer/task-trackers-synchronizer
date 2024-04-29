@@ -21,7 +21,12 @@ class ConvertableAttr:
     def resolve_type(self, obj: object) -> t.Type:
         return type(self.resolve_value(obj))
 
-    def set_value(self, obj: object, value: object, unconvert: bool = True) -> None:
+    def set_value(
+        self,
+        obj: object,
+        value: object,
+        unconvert: bool = True,
+    ) -> None:
         attr_split = self.attr.split(".")
         attr_chain, attr_last = attr_split[:-1], attr_split[-1]
         obj_last = reduce(getattr, [obj] + attr_chain)
@@ -66,13 +71,15 @@ class Issue:
         self._source = source
 
         if not all(key in attrs_map.keys() for key in self._default_attrs):
-            raise ValueError("attrs_map is incomplete, please refer to _default_attrs")
+            raise ValueError("attrs_map is incomplete")
 
         self._attrs_map = attrs_map
 
         for key in attrs_map:
             c_attr = self._attrs_map[key]
-            setattr(self, key, c_attr.convert(c_attr.resolve_value(self._source)))
+            setattr(
+                self, key, c_attr.convert(c_attr.resolve_value(self._source))
+            )
 
     def asdict(self) -> dict[str, str]:
         return {
@@ -83,9 +90,13 @@ class Issue:
             and not callable(getattr(value, "__get__", None))
         }
 
-    def import_values(self, data: dict[str, str], convert: bool = True) -> None:
+    def import_values(
+        self,
+        data: dict[str, str],
+        convert: bool = True,
+    ) -> None:
         if not all(key in self._default_attrs for key in data.keys()):
-            raise ValueError("data is incomplete, please refer to _default_attrs")
+            raise ValueError("data is incomplete")
 
         for key, value in data.items():
             if convert:

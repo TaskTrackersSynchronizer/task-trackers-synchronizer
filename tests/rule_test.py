@@ -24,7 +24,9 @@ def test_bidirectional_sync():
     rule = Rule(source=src, destination=dest)
 
     issues = issues_svc.get_issues()
-    gitlab_issue: Issue = [x for x in issues if x.issue_name == "hello world"][0]
+    gitlab_issue: Issue = [x for x in issues if x.issue_name == "hello world"][
+        0
+    ]
     jira_issue: Issue = [x for x in issues if x.issue_name == "hello world"][1]
 
     assert gitlab_issue.description != jira_issue.description
@@ -57,7 +59,9 @@ def test_src_to_dest_sync():
     )
 
     issues = issues_svc.get_issues()
-    gitlab_issue: Issue = [x for x in issues if x.issue_name == "hello world"][0]
+    gitlab_issue: Issue = [x for x in issues if x.issue_name == "hello world"][
+        0
+    ]
     jira_issue: Issue = [x for x in issues if x.issue_name == "hello world"][1]
 
     assert gitlab_issue.description != jira_issue.description
@@ -90,7 +94,9 @@ def test_dest_to_src_sync():
     )
 
     issues = issues_svc.get_issues()
-    gitlab_issue: Issue = [x for x in issues if x.issue_name == "hello world"][0]
+    gitlab_issue: Issue = [x for x in issues if x.issue_name == "hello world"][
+        0
+    ]
     jira_issue: Issue = [x for x in issues if x.issue_name == "hello world"][1]
 
     assert gitlab_issue.description != jira_issue.description

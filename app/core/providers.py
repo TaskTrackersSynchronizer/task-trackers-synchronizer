@@ -36,7 +36,9 @@ class GitlabProvider(Provider):
 
     def get_project_issues(self, project_name: str) -> list[GitlabIssue]:
         user_projects = self._user.projects.list(pagination=False)
-        user_project = next(filter(lambda x: x.name == project_name, user_projects))
+        user_project = next(
+            filter(lambda x: x.name == project_name, user_projects)
+        )
 
         if not user_project:
             raise GitlabError("Gitlab project not found")
@@ -48,7 +50,9 @@ class GitlabProvider(Provider):
 
 class JiraProvider(Provider):
     def __init__(self) -> None:
-        self._client = JIRA(server=JIRA_SERVER, basic_auth=(JIRA_EMAIL, JIRA_API_TOKEN))
+        self._client = JIRA(
+            server=JIRA_SERVER, basic_auth=(JIRA_EMAIL, JIRA_API_TOKEN)
+        )
 
     def get_project_issues(self, project_name: str) -> list[JiraIssue]:
         # validate project name

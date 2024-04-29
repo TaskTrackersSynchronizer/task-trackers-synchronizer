@@ -3,7 +3,8 @@ from abc import ABC, abstractmethod
 from functools import reduce
 from copy import deepcopy
 
-import sqlite3, json
+import sqlite3
+import json
 import typing as t
 
 
@@ -35,10 +36,12 @@ class Database(ABC):
 
 class DocumentDatabase(Database):
     """
-    Database class for storing documents in a SQLite database in a NoSQL-like way
+    Database class for storing documents in a SQLite database in a
+    NoSQL-like way
     """
 
-    # A list of allowed tables. Tables with such names will be created if they don't exist in the DB.
+    # A list of allowed tables. Tables with such names will be created
+    # if they don't exist in the DB.
     TABLES: dict[str, str] = {
         "issues": "issues",
         "rules": "rules",
@@ -51,7 +54,8 @@ class DocumentDatabase(Database):
         """
         self._db = sqlite3.connect(f)
         for table_name in self.TABLES.keys():
-            self._db.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (data TEXT);")
+            query = f"CREATE TABLE IF NOT EXISTS {table_name} (data TEXT);"
+            self._db.execute(query)
 
     def _check_table(self, table_name: str) -> None:
         """
@@ -77,7 +81,8 @@ class DocumentDatabase(Database):
         :param row: dictionary representing the row
         """
         self._check_table(table_name)
-        self._db.execute(f"INSERT INTO {table_name} VALUES (?);", (json.dumps(row),))
+        query = f"INSERT INTO {table_name} VALUES (?);"
+        self._db.execute(query, (json.dumps(row),))
 
     def add_all(self, table_name: str, rows: list[dict]) -> None:
         """
@@ -104,10 +109,12 @@ class DocumentDatabase(Database):
     def find(self, table_name: str, query: dict) -> list[dict]:
         """
         Find rows in a table that match a query
-        Limitations: only supports exact matches (check dict elements for equality)
+        Limitations: only supports exact matches
+                     (check dict elements for equality)
         :param table: name of the table
         :param query: dictionary of key-value pairs to match
-        :return: list of dictionaries representing the rows that match the query (empty if none match)
+        :return: list of dictionaries representing the rows that
+                 match the query (empty if none match)
         """
 
         def accum_func(
@@ -117,7 +124,7 @@ class DocumentDatabase(Database):
 
         results = []
 
-        q = " AND ".join(f" json_extract(data, ?) = ?" for _ in range(len(query)))
+        q = " AND ".join([" json_extract(data, ?) = ?"] * len(query))
 
         statement = self._db.execute(
             f"SELECT * FROM {table_name} WHERE {q}",
@@ -125,7 +132,8 @@ class DocumentDatabase(Database):
         )
 
         for r in statement:
-            # we need generators here? do yield then instead of adding to the list
+            # we need generators here? do yield then instead of adding
+            # to the list
             # yield r[0]
             results.append(json.loads(r[0]))
 
