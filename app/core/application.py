@@ -1,10 +1,12 @@
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.api.endpoints import fields_mock, rules_mock, trackers_mock
 
 
 def create_api():
     api = FastAPI()
+    Instrumentator().instrument(api).expose(api)
 
     # api.include_router(hello.router)
 
@@ -13,6 +15,7 @@ def create_api():
 
 def create_mock_api() -> FastAPI:
     api = FastAPI()
+    Instrumentator().instrument(api).expose(api)
 
     api.include_router(fields_mock.router)
     api.include_router(rules_mock.router)
