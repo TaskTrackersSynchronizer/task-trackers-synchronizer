@@ -1,5 +1,6 @@
 from app.core.issues import Issue, DefaultSource
 from abc import ABC, abstractmethod
+from functools import reduce
 from copy import deepcopy
 
 import sqlite3, json
@@ -108,18 +109,26 @@ class DocumentDatabase(Database):
         :param query: dictionary of key-value pairs to match
         :return: list of dictionaries representing the rows that match the query (empty if none match)
         """
+
+        def accum_func(
+            accumulator: list[str], query_row: tuple[str, object]
+        ) -> list[object]:
+            return accumulator + [f"$.{query_row[0]}", query_row[1]]
+
         results = []
-        for k, v in query.items():
-            if isinstance(v, str):
-                query[k] = f"'{v}'"
-            # FIXME injection
-            q = " AND ".join(
-                f" json_extract(data, '$.{k}') = {v}" for k, v in query.items()
-            )
-            for r in self._db.execute(f"SELECT * FROM {table_name} WHERE {q}"):
-                # we need generators here? do yield then instead of adding to the list
-                # yield r[0]
-                results.append(json.loads(r[0]))
+
+        q = " AND ".join(f" json_extract(data, ?) = ?" for _ in range(len(query)))
+
+        statement = self._db.execute(
+            f"SELECT * FROM {table_name} WHERE {q}",
+            reduce(accum_func, query.items(), []),
+        )
+
+        for r in statement:
+            # we need generators here? do yield then instead of adding to the list
+            # yield r[0]
+            results.append(json.loads(r[0]))
+
         return results
 
     def close(self):
