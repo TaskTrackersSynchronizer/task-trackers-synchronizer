@@ -44,15 +44,23 @@ class Rule:
             else:
                 newer, older = dst_issue, src_issue
 
-            setattr(older, self.source.field, getattr(newer, self.destination.field))
+            setattr(
+                older,
+                self.source.field,
+                getattr(newer, self.destination.field),
+            )
 
         elif self.condition.direction == RuleDirection.SRC_TO_DEST:
             setattr(
-                dst_issue, self.source.field, getattr(src_issue, self.destination.field)
+                dst_issue,
+                self.source.field,
+                getattr(src_issue, self.destination.field),
             )
         elif self.condition.direction == RuleDirection.DEST_TO_SRC:
             setattr(
-                src_issue, self.source.field, getattr(dst_issue, self.destination.field)
+                src_issue,
+                self.source.field,
+                getattr(dst_issue, self.destination.field),
             )
         else:
             raise SyncError("Unable to resolve sync rule")
