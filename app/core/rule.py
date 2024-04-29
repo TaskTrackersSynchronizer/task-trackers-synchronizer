@@ -24,6 +24,7 @@ class Rule:
     destination: RuleSide
     condition: Optional[Condition] = None
 
+    # TODO: add is_synced method
     def sync(self, src_issue: Issue, dst_issue: Issue) -> tuple[Issue, Issue]:
         if self.condition is None:
             newer: Issue
