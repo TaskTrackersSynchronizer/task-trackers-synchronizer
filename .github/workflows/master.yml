@@ -4,7 +4,7 @@ on:
   push:
     branches: ["master", "ci"]
 
-# jobs:
+jobs:
 #   flake8:
 #     name: flake8/lint
 #     runs-on: ubuntu-latest
