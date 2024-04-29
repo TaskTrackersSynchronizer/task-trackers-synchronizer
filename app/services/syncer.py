@@ -122,3 +122,18 @@ class Syncer:
             # recently_updated_issues = src_issues + dst_issues
 
         self.updated_at = datetime.now()
+    
+    def sync_minimal(self, src_issues: list[Issue], dst_issues: list[Issue]) -> None:
+        mappings = {
+            src.issue_name: [src, dst]
+            for src in src_issues
+            for dst in dst_issues
+            if src.issue_name == dst.issue_name
+        }
+
+        print(src_issues, dst_issues)
+        print(mappings)
+
+        for (src_issue, dst_issue) in mappings.values():
+            for rule in self.rules_svc.get_rules():
+                rule.sync(src_issue, dst_issue)
