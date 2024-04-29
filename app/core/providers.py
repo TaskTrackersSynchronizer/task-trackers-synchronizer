@@ -3,6 +3,7 @@ from gitlab import Gitlab, GitlabError
 from jira import JIRA, JIRAError
 from dotenv import load_dotenv
 from datetime import datetime
+import pytest
 
 from app.core.issues import Issue, JiraIssue, GitlabIssue
 
@@ -31,6 +32,7 @@ class Provider(ABC):
         pass
 
 
+@pytest.mark.integration
 class GitlabProvider(Provider):
     def __init__(self) -> None:
         self._client = Gitlab(url=GITLAB_SERVER, oauth_token=GITLAB_API_TOKEN)
@@ -42,9 +44,7 @@ class GitlabProvider(Provider):
 
     def get_project_issues(self, project_name: str) -> list[GitlabIssue]:
         user_projects = self._user.projects.list(pagination=False)
-        user_project = next(
-            filter(lambda x: x.name == project_name, user_projects)
-        )
+        user_project = filter(lambda x: x.name == project_name, user_projects)
 
         if not user_project:
             raise GitlabError("Gitlab project not found")
@@ -99,12 +99,25 @@ class JiraProvider(Provider):
         return self.get_issues(f"updated>='{updated_at_str}'")
 
 
-PROVIDERS = {
-    "gitlab": GitlabProvider(),
-    "jira": JiraProvider(),
+class SingletonObject:
+    def __init__(self, wrapped_class, *args, **kwargs):
+        self._cls = wrapped_class
+        self._args = args
+        self._kwargs = kwargs
+        self._instance = None
+
+    def get_instance(self):
+        if self._instance is None:
+            self._instance = self._cls(*self._args, **self._kwargs)
+        return self._instance
+
+
+PROVIDERS_OBJS: t.Dict = {
+    "gitlab": SingletonObject(GitlabProvider),
+    "jira": SingletonObject(JiraProvider)
 }
-PROVIDER_NAMES = [x for x in PROVIDERS]
+PROVIDER_NAMES = list(PROVIDERS_OBJS.keys())
 
 
-def get_provider(name: str) -> t.Optional[Provider]:
-    return PROVIDERS.get(name, None)
+def get_provider(provider_name: str) -> Provider:
+    return PROVIDERS_OBJS[provider_name].get_instance()

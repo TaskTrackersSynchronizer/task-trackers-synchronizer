@@ -1,15 +1,16 @@
-from app.core.providers import get_provider, JiraProvider, GitlabProvider
+from app.core.providers import Provider, get_provider, PROVIDER_NAMES
 from app.core.issues import DEFAULT_ATTRS_MAP
 import pytest
 from datetime import datetime
 
-BAORD_NAME = "KAN"
-PROVIDERS = [get_provider("jira"), get_provider("gitlab")]
+BOARD_NAME = "KAN"
 
 
-@pytest.mark.parametrize("provider", PROVIDERS)
+@pytest.mark.integration
+@pytest.mark.parametrize("provider", PROVIDER_NAMES)
 def test_issue_creation(provider):
-    issues = provider.get_project_issues(BAORD_NAME)
+    provider = get_provider(provider)
+    issues = provider.get_project_issues(BOARD_NAME)
 
     assert len(issues) != 0, "Issues must not be empty"
 
@@ -18,12 +19,15 @@ def test_issue_creation(provider):
             assert hasattr(issue, attr), f"No attr {attr} found"
 
 
-@pytest.mark.parametrize("provider", PROVIDERS)
+@pytest.mark.integration
+@pytest.mark.parametrize("provider", PROVIDER_NAMES)
 def test_issue_update(provider):
+    provider = get_provider(provider)
+
     def get_description(text: str) -> str:
         return text + text if len(text) < 16 else "text"
 
-    issues = provider.get_project_issues(BAORD_NAME)
+    issues = provider.get_project_issues(BOARD_NAME)
 
     assert len(issues) != 0, "Issues must not be empty"
 
@@ -36,7 +40,7 @@ def test_issue_update(provider):
         issue.import_values(data)
         issue.update()
 
-    issues = provider.get_project_issues(BAORD_NAME)
+    issues = provider.get_project_issues(BOARD_NAME)
 
     assert len(issues) != 0, "Issues must not be empty"
 
@@ -46,8 +50,9 @@ def test_issue_update(provider):
         ), "Failed to update issue"
 
 
+@pytest.mark.integration
 def test_jira_get_last_updated_at():
-    provider: JiraProvider = get_provider("jira")
+    provider: Provider = get_provider("jira")
 
     updated_at_str = "2021-04-28T10:15:30.123456+0530"
     updated_at = datetime.strptime(updated_at_str, "%Y-%m-%dT%H:%M:%S.%f%z")
@@ -57,8 +62,9 @@ def test_jira_get_last_updated_at():
     print(f"issues: {issues} size: {len(issues)}")
 
 
+@pytest.mark.integration
 def test_gitlab_get_last_updated_at():
-    provider: GitlabProvider = get_provider("gitlab")
+    provider: Provider = get_provider("gitlab")
 
     updated_at_str = "2021-04-28T10:15:30.123456+0530"
     updated_at = datetime.strptime(updated_at_str, "%Y-%m-%dT%H:%M:%S.%f%z")

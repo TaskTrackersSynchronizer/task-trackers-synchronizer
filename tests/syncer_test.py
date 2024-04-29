@@ -3,12 +3,14 @@ from app.core.providers import JiraProvider, GitlabProvider
 from app.core.issues import Issue, JiraIssue, GitlabIssue, IssuePair
 from app.core.db import MockDatabase
 from app.core.providers import get_provider
+import pytest
 
 
-# def test_syncs_existing():
-#     # TODO: backup all existing
-#     db = MockDatabase()
-#     syncer: Syncer = Syncer(db)
+@pytest.mark.integration
+def test_syncs_existing():
+    # TODO: backup all existing
+    db = MockDatabase()
+    syncer: Syncer = Syncer(db)
 
 #     jira_provider = get_provider("jira")
 #     gitlab_provider = get_provider("gitlab")
@@ -43,6 +45,7 @@ from app.core.providers import get_provider
     # 6. update issues to contain old values
 
 
+@pytest.mark.integration
 def test_sync_minimal():
     gitlab_provider = GitlabProvider()
     jira_provider = JiraProvider()

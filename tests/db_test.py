@@ -9,6 +9,7 @@ def init_document_db() -> DocumentDatabase:
     return db
 
 
+@pytest.mark.unit
 def test_document_db_add_single_row(init_document_db: DocumentDatabase):
     """
     Test adding a single row to the database
@@ -21,6 +22,7 @@ def test_document_db_add_single_row(init_document_db: DocumentDatabase):
     assert db_stored_issues[0] == issue, "DB and original issues do not match"
 
 
+@pytest.mark.unit
 def test_document_db_add_multiple_rows_rowwise(
     init_document_db: DocumentDatabase,
 ):
@@ -40,6 +42,7 @@ def test_document_db_add_multiple_rows_rowwise(
     ), "DB and original issues do not match"
 
 
+@pytest.mark.unit
 def test_document_db_add_all_rows(init_document_db: DocumentDatabase):
     """
     Test adding multiple rows to the database in bulk
@@ -56,9 +59,10 @@ def test_document_db_add_all_rows(init_document_db: DocumentDatabase):
     ), "DB and original issues do not match"
 
 
+@pytest.mark.unit
 def test_document_db_find(init_document_db: DocumentDatabase):
     """
-    Test adding multiple rows to the database in bulk
+    Test adding multiple rows to the database in bulk and then finding
     """
     db = init_document_db
     issues: List[Dict] = MockDatabase.prepare_mock_issues()
