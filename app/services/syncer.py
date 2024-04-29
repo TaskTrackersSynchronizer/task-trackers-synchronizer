@@ -1,4 +1,5 @@
 from app.services.issues import IssuesService
+from collections import defaultdict
 from app.services.rules import RulesService
 from app.core.rule import Rule
 from app.core.issues import Issue
@@ -24,7 +25,8 @@ class ProjectNamePair:
     src_provider: Provider
     dst_provider: Provider
     rules: list[Rule]
-
+    issues: list[Issue]
+    
 
 class Syncer:
     def __init__(self, db: DocumentDatabase) -> None:
@@ -45,17 +47,21 @@ class Syncer:
         self, rules: list[Rule], src_tracker: str, dst_tracker: str
     ) -> list[ProjectNamePair]:
         relevant_projects: list[ProjectNamePair] = []
-        projects_dict: dict[tuple[str, str], list[Rule]] = {}
-
+        projects_dict: dict[tuple[str, str], list[Rule]] = defaultdict(list)
         rule: Rule
+        # print(
+        #     f"get_project_name_pairs_from_rule: src_tracker: {src_tracker}, dst_tracker: {dst_tracker}"
+        # )
         for rule in rules:
+            print(rule)
+            # print(
+            #         f"rule: src_tracker: {rule.source.tracker}, dst_tracker: {rule.destination.tracker}, src_board: {rule.}"
+            # )
             if (
-                rule.source.tracker == get_provider(src_tracker)
-                and rule.destination.tracker == src_tracker
+                rule.source.tracker.lower() == src_tracker.lower()
+                and rule.destination.tracker.lower() == dst_tracker.lower()
             ):
-                projects_dict[(rule.source.project, rule.destination.project)].append(
-                    rule
-                )
+                projects_dict[(rule.source.board, rule.destination.board)].append(rule)
 
         for projects_pair, rules in projects_dict.items():
             relevant_projects.append(
@@ -97,24 +103,36 @@ class Syncer:
         # TODO: order source and target
         rules: list[Rule] = self.rules_svc.get_rules()
 
-        # TODO: parametrize unique pairs of providers
-        ordered_providers: list[str] = [("jira", "gitlab")]
+        # TODO: parametrize unique increasingly ordered pairs of providers
+        ordered_providers: list[str] = [("Gitlab", "Jira")]
 
         # TODO: ensure that all pairs are ordered
         for providers_pair in ordered_providers:
             src_provider: Provider = get_provider(providers_pair[0])
             dst_provider: Provider = get_provider(providers_pair[1])
+            assert src_provider is not None
+            assert dst_provider is not None
             projects_pairs: list[
                 ProjectNamePair
             ] = self.get_project_name_pairs_from_rules(
-                rules, src_provider, dst_provider
+                rules, providers_pair[0], providers_pair[1]
             )
 
-            for projects_pair in projects_pairs:
-                self.sync_projects(projects_pair.src, projects_pair.dst)
+            # for pp in projects_pairs:
+            #     if pp.src_project 
 
-            src_issues = src_provider.get_last_updated_issues(self.updated_at)
-            dst_issues = dst_provider.get_last_updated_issues(self.updated_at)
+            # src_issues = src_provider.get_last_updated_issues(self.updated_at)
+            # dst_issues = dst_provider.get_last_updated_issues(self.updated_at)
+            # 1. group by rules
+            
+            src_project_issues = []
+            dst_project_issues = []
+            # for proj_name, issues in groupby(src_issues, lambda x: x[0]):
+            #     for thing in group:
+            #         print("A %s is a %s." % (thing[1], key))
+            
+            src_project_issues = src_issues.
+
             recently_updated_issues = src_issues + dst_issues
 
             # assuming source and target projects are defined

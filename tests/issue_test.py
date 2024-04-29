@@ -21,7 +21,9 @@ def test_issue_creation(provider):
 @pytest.mark.parametrize("provider", PROVIDERS)
 def test_issue_update(provider):
     def get_description(text: str) -> str:
-        return text + text if len(text) < 16 else "text"
+        now = datetime.now()
+        formatted = now.strftime("%Y-%m-%d %H:%M:%S")
+        return f"test_{formatted}"
 
     issues = provider.get_project_issues(BAORD_NAME)
 
@@ -30,6 +32,8 @@ def test_issue_update(provider):
     issue_description_map = {issue.issue_id: issue.description for issue in issues}
 
     for issue in issues:
+        # TODO: assert on new values
+
         data = {"description": get_description(issue.description)}
         issue.import_values(data)
         issue.update()

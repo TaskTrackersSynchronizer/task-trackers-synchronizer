@@ -188,8 +188,8 @@ class MockDatabase(Database):
             asdict(x)
             for x in [
                 Rule(
-                    RuleSide("Jira", "KAN", "description"),
-                    RuleSide("Gitlab", "KAN", "description"),
+                    source=RuleSide("Gitlab", "KAN", "description"),
+                    destination=RuleSide("Jira", "KAN", "description"),
                 )
             ]
         ]

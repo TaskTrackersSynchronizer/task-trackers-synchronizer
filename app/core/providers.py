@@ -9,6 +9,7 @@ from app.core.issues import Issue, JiraIssue, GitlabIssue
 import typing as t
 import re
 import os
+from typing import Optional
 
 load_dotenv()
 
@@ -23,7 +24,9 @@ GITLAB_API_TOKEN = os.environ.get("GITLAB_API_TOKEN", "")
 
 class Provider(ABC):
     @abstractmethod
-    def get_project_issues(self, project_name: str) -> list[Issue]:
+    def get_project_issues(
+        self, project_name: str, updated_at: Optional[datetime] = None
+    ) -> list[Issue]:
         pass
 
     @abstractmethod
@@ -40,7 +43,9 @@ class GitlabProvider(Provider):
         self._issues_api = self._client.issues
         self._user = self._client.users.get(self._user_id)
 
-    def get_project_issues(self, project_name: str) -> list[GitlabIssue]:
+    def get_project_issues(
+        self, project_name: str, updated_at: Optional[datetime] = None
+    ) -> list[GitlabIssue]:
         user_projects = self._user.projects.list(pagination=False)
         user_project = next(filter(lambda x: x.name == project_name, user_projects))
 
@@ -48,7 +53,11 @@ class GitlabProvider(Provider):
             raise GitlabError("Gitlab project not found")
 
         project = self._client.projects.get(user_project.id)
-        issues = project.issues.list(pagination=False)
+        if updated_at is not None:
+            issues = project.issues.list(pagination=False, updated_after=updated_at)
+        else:
+            issues = project.issues.list(pagination=False)
+
         return list(map(GitlabIssue, issues))
 
     def get_last_updated_issues(
@@ -81,13 +90,18 @@ class JiraProvider(Provider):
         return list(map(JiraIssue, issues))
 
     # todo: allow fetching from list of projects
-    def get_project_issues(self, project_name: str) -> list[JiraIssue]:
+    def get_project_issues(
+        self, project_name: str, updated_at: Optional[datetime] = None
+    ) -> list[JiraIssue]:
         # validate project name
         if not re.fullmatch(r"\w{2,80}", project_name):
             raise JIRAError("Invalid project name")
 
-        # TODO: handle query injection attacks more accurate
-        issues = self.get_issues(f'project = "{project_name}"')
+        query = f'project = "{project_name}"'
+        if updated_at is not None:
+            updated_at_str = updated_at.strftime("%Y-%m-%d %H:%M")
+            query += f" AND updated>='{updated_at_str}'"
+        issues = self.get_issues(query)
         return issues
 
     def get_last_updated_issues(self, updated_at: datetime) -> list[JiraIssue]:
@@ -104,4 +118,5 @@ PROVIDER_NAMES = [x for x in PROVIDERS]
 
 
 def get_provider(name: str) -> t.Optional[Provider]:
-    return PROVIDERS.get(name, None)
+    assert type(name) == str
+    return PROVIDERS.get(name.lower(), None)
