@@ -8,7 +8,7 @@ from app.core.providers import Provider, get_provider
 from app.core.rule import Rule, RuleDTO
 from fastapi import Depends, FastAPI, HTTPException
 from app.core.db import get_db
-import app.services.rules as rules
+import app.api.crud as crud
 
 import typing as t
 
@@ -19,14 +19,14 @@ router = APIRouter()
 # have differnet fields per project
 @router.get("/api/rule_list")
 def get_rules(db: DocumentDatabase = Depends(get_db)):
-    return rules.get_rules(db)
+    return crud.get_rules(db)
 
 
 @router.post("/api/add_rule")
 def add_rule(rule: RuleDTO, db: DocumentDatabase = Depends(get_db)):
-    return rules.add_rule(Rule.from_dto(rule), db)
+    return crud.add_rule(rule, db)
 
 
 @router.get("/api/remove_rule")
 def remove_rule(rule: RuleDTO, db: DocumentDatabase = Depends(get_db)):
-    return rules.remove_rule(Rule.from_dto(rule), db)
+    return crud.remove_rule(rule, db)

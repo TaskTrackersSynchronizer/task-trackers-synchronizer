@@ -27,12 +27,30 @@ class RuleDTO(BaseModel):
     destination: FieldFilter
     direction: RuleDirection
 
-
-# export class SyncRule {
-#     source: FieldFilter;
-#     destination: FieldFilter;
-#     direction: SyncDirection;
-# }
+    # TODO: handle comp_op for conditions
+    @classmethod
+    def from_rule(cls, rule: "Rule") -> "RuleDTO":
+        dto = cls(
+            source=FieldFilter(
+                tracker=rule.source.tracker,
+                board=rule.source.project,
+                field_name=rule.source.field,
+                # Used for conditional rules, not supported
+                comp_op="",
+                field_val="",
+            ),
+            destination=FieldFilter(
+                tracker=rule.destination.tracker,
+                board=rule.destination.project,
+                field_name=rule.destination.field,
+                # Used for conditional rules, not supported
+                comp_op="",
+                field_val="",
+            ),
+            # Used for conditional rules, not supported
+            direction=RuleDirection.ANY,
+        )
+        return dto
 
 
 @dataclass
