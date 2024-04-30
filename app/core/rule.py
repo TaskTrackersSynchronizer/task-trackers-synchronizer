@@ -24,7 +24,16 @@ class Rule:
     destination: RuleSide
     condition: Optional[Condition] = None
 
-    # TODO: add is_synced method
+    def is_synced(self, src_issue: Issue, dst_issue: Issue):
+        # TODO: handle condition
+        # if self.condition is None:
+
+        if getattr(src_issue, self.source.field) == getattr(
+            dst_issue, self.destination.field
+        ):
+            return True
+        return False
+
     def sync(self, src_issue: Issue, dst_issue: Issue) -> tuple[Issue, Issue]:
         if self.condition is None:
             newer: Issue
@@ -52,6 +61,7 @@ class Rule:
             )
 
             older.update()
+        # TODO: handle condition testing
         elif self.condition.direction == RuleDirection.SRC_TO_DEST:
             setattr(
                 dst_issue,

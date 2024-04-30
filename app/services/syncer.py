@@ -6,9 +6,10 @@ from app.core.providers import get_provider
 from app.core.db import DocumentDatabase
 from datetime import datetime
 from app.core.providers import Provider
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
-import typing as t
+from app.core.logger import logger
+from collections import defaultdict
 
 
 @dataclass
@@ -23,16 +24,12 @@ class ProjectNamePair:
     dst_project: str
     src_provider: Provider
     dst_provider: Provider
-    rules: list[Rule]
+    rules: list[Rule] = field(default_factory=list)
+    issues: list[Issue] = field(default_factory=list)
 
 
 class Syncer:
     def __init__(self, db: DocumentDatabase) -> None:
-        # self.jira_db = DocumentDatabase(":memory:")
-        # self.gitlab_db = DocumentDatabase(":memory:")
-        # todo: use same db
-        # self.jira_provider: JiraProvider = get_provider(name="jira")
-        # self.gitlab_provider: GitlabProvider = get_provider(name="gitlab")
         self.rules_svc = RulesService(db)
         self.issues_svc = IssuesService(db)
         # todo: renew updated at
@@ -45,18 +42,21 @@ class Syncer:
         self, rules: list[Rule], src_tracker: str, dst_tracker: str
     ) -> list[ProjectNamePair]:
         relevant_projects: list[ProjectNamePair] = []
-        projects_dict: dict[tuple[str, str], list[Rule]] = {}
+        projects_dict: dict[tuple[str, str], list[Rule]] = defaultdict(list)
 
+        logger.debug(f"get_project_name_pairs_from_rules rules: {rules}")
+        logger.debug(
+            f"get_project_name_pairs_from_rules src_tracker: {src_tracker}, dst_tracler: {dst_tracker}"
+        )
         rule: Rule
         for rule in rules:
             if (
-                rule.source.tracker == get_provider(src_tracker)
-                and rule.destination.tracker == src_tracker
+                rule.source.tracker.lower() == src_tracker.lower()
+                and rule.destination.tracker.lower() == dst_tracker.lower()
             ):
-                projects_dict[
-                    (rule.source.project, rule.destination.project)
-                ].append(rule)
+                projects_dict[(rule.source.board, rule.destination.board)].append(rule)
 
+        logger.info(projects_dict)
         for projects_pair, rules in projects_dict.items():
             relevant_projects.append(
                 ProjectNamePair(
@@ -70,21 +70,26 @@ class Syncer:
 
         return relevant_projects
 
-    def handle_updated_issues(
-        self, projects: ProjectNamePair, updated_issues: list[Issue]
-    ):
-        for rule in projects.rules:
-            for issue in updated_issues:
+    # - We assume that script runs quick enough so issue is updated only at one side
+    # - We assume that issues between two projects within same provider are not synced
+    # - We assume that there can be only one related issue in a pair of two  project providers
+    def handle_updated_issues(self, projects_pairs: ProjectNamePair):
+        projects_pairs.issues.sort(key=lambda x: x.updated_at)
+        assert len(projects_pairs.issues) > 0
+        assert len(projects_pairs.rules) > 0
+        for rule in projects_pairs.rules:
+            for issue in projects_pairs.issues:
                 # TODO: make database issue provider
                 # TODO: fetch local
-                related_issue: Optional[Issue] = (
-                    self.issues_svc.get_related_issue(
-                        issue, projects.dst_provider
-                    )
+
+                # TODO: for each issue keep set of related ids
+                related_issue: Optional[Issue] = self.issues_svc.get_related_issue(
+                    issue, rule.destination.board, projects_pairs.dst_provider
                 )
                 if related_issue is None:
                     # related issue didn't exist
                     # creation is needed
+                    assert False
                     pass
                 else:
                     rule.sync(issue, related_issue)
@@ -98,42 +103,25 @@ class Syncer:
         rules: list[Rule] = self.rules_svc.get_rules()
 
         # TODO: parametrize unique pairs of providers
-        ordered_providers: t.List[t.Tuple[str]] = [("jira", "gitlab")]
+        ordered_providers: list[str] = [("gitlab", "jira")]
 
         # TODO: ensure that all pairs are ordered
         for providers_pair in ordered_providers:
-            src_provider: Provider = get_provider(providers_pair[0])
-            dst_provider: Provider = get_provider(providers_pair[1])
-            projects_pairs: list[ProjectNamePair] = (
-                self.get_project_name_pairs_from_rules(
-                    rules, src_provider, dst_provider
-                )
+            projects_pairs: list[
+                ProjectNamePair
+            ] = self.get_project_name_pairs_from_rules(
+                rules, providers_pair[0], providers_pair[1]
             )
 
             for projects_pair in projects_pairs:
-                self.sync_projects(projects_pair.src, projects_pair.dst)
+                projects_pair.issues += projects_pair.src_provider.get_project_issues(
+                    projects_pair.src_project, updated_at=self.updated_at
+                )
 
-            # FIXME lines below commented out to satisfy the linter.
-            # reconsider the need for them.
-            # src_issues = src_provider.get_last_updated_issues(
-            #        self.updated_at)
-            # dst_issues = dst_provider.get_last_updated_issues(
-            #        self.updated_at)
-            # recently_updated_issues = src_issues + dst_issues
+                projects_pair.issues += projects_pair.dst_provider.get_project_issues(
+                    projects_pair.dst_project, updated_at=self.updated_at
+                )
+
+                self.handle_updated_issues(projects_pair)
 
         self.updated_at = datetime.now()
-    
-    def sync_minimal(self, src_issues: list[Issue], dst_issues: list[Issue]) -> None:
-        mappings = {
-            src.issue_name: [src, dst]
-            for src in src_issues
-            for dst in dst_issues
-            if src.issue_name == dst.issue_name
-        }
-
-        print(src_issues, dst_issues)
-        print(mappings)
-
-        for (src_issue, dst_issue) in mappings.values():
-            for rule in self.rules_svc.get_rules():
-                rule.sync(src_issue, dst_issue)

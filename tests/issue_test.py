@@ -1,5 +1,6 @@
 from app.core.providers import Provider, get_provider, PROVIDER_NAMES
-from app.core.issues import DEFAULT_ATTRS_MAP
+from app.core.providers import get_provider, JiraProvider
+from app.core.issues import DEFAULT_ATTRS_MAP, GitlabIssue, JiraIssue
 import pytest
 from datetime import datetime
 
@@ -25,17 +26,19 @@ def test_issue_update(provider):
     provider = get_provider(provider)
 
     def get_description(text: str) -> str:
-        return text + text if len(text) < 16 else "text"
+        now = datetime.now()
+        formatted = now.strftime("%Y-%m-%d %H:%M:%S")
+        return f"test_{formatted}"
 
     issues = provider.get_project_issues(BOARD_NAME)
 
     assert len(issues) != 0, "Issues must not be empty"
 
-    issue_description_map = {
-        issue.issue_id: issue.description for issue in issues
-    }
+    issue_description_map = {issue.issue_id: issue.description for issue in issues}
 
     for issue in issues:
+        # TODO: assert on new values
+
         data = {"description": get_description(issue.description)}
         issue.import_values(data)
         issue.update()
@@ -72,3 +75,21 @@ def test_gitlab_get_last_updated_at():
     issues = provider.get_last_updated_issues(updated_at)
 
     print(f"issues: {issues} size: {len(issues)}")
+
+    # updated_at: str = "2024-04-27 05:01:16"
+
+
+def test_gitlab_get_issue_by_name():
+    provider: GitlabProvider = get_provider("gitlab")
+
+    issue = provider.get_project_issue_by_name("KAN", "name")
+    assert issue is not None
+    assert gitlab_issue.issue_name == "name"
+
+
+def test_jira_get_issue_by_name():
+    provider: JiraProvider = get_provider("jira")
+
+    issue = provider.get_project_issue_by_name("KAN", "name")
+    assert issue is not None
+    assert issue.issue_name == "name"
