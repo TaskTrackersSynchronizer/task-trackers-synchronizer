@@ -22,6 +22,8 @@ JIRA_API_TOKEN = os.environ.get("JIRA_API_TOKEN", "")
 
 GITLAB_SERVER = os.environ.get("GITLAB_SERVER", "https://gitlab.com")
 GITLAB_API_TOKEN = os.environ.get("GITLAB_API_TOKEN", "")
+assert GITLAB_API_TOKEN, "GITLAB_API_TOKEN is not set"
+assert JIRA_API_TOKEN, "JIRA_API_TOKEN is not set"
 
 
 class Provider(ABC):
@@ -60,6 +62,8 @@ class GitlabProvider(Provider):
 
         if not user_project:
             raise GitlabError("Gitlab project not found")
+
+        user_project = next(user_project)
 
         project = self._client.projects.get(user_project.id)
         if updated_at is not None:
