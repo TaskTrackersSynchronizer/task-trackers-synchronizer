@@ -22,7 +22,6 @@ jobs:
       run: poetry install
     - name: Run tests with coverage gate
       run:  poetry run pytest --cov=. tests/ --cov-report=json --cov-fail-under=80
-    - name: Upload coverage report
 
   flake8:
     name: flake8/lint
