@@ -1,14 +1,38 @@
-from app.core.condition import Condition, RuleDirection
+from app.core.condition import Condition, RuleDirection, DefaultCondition
 from app.core.issues import Issue
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 from datetime import datetime
+from pydantic import BaseModel
 
 # Rules for synchronization between source and task trackers
 
 
 class SyncError(RuntimeError):
     pass
+
+
+@dataclass
+class FieldFilter(BaseModel):
+    tracker: str
+    board: str
+    field_name: str
+    field_val: str
+    comp_op: str
+
+
+@dataclass
+class RuleDTO(BaseModel):
+    source: FieldFilter
+    destination: FieldFilter
+    direction: RuleDirection
+
+
+# export class SyncRule {
+#     source: FieldFilter;
+#     destination: FieldFilter;
+#     direction: SyncDirection;
+# }
 
 
 @dataclass
@@ -22,7 +46,25 @@ class RuleSide:
 class Rule:
     source: RuleSide
     destination: RuleSide
-    condition: Optional[Condition] = None
+    condition: Condition = field(default_factory=DefaultCondition)
+
+    @classmethod
+    def from_dto(cls, dto: RuleDTO) -> "Rule":
+        # TODO: parse condition
+        rule = cls(
+            source=RuleSide(
+                tracker=dto.source.tracker,
+                project=dto.source.board,
+                field=dto.source.field_name,
+            ),
+            destination=RuleSide(
+                tracker=dto.source.tracker,
+                project=dto.source.board,
+                field=dto.source.field_name,
+            ),
+            condition=DefaultCondition(),
+        )
+        return rule
 
     def is_synced(self, src_issue: Issue, dst_issue: Issue):
         # TODO: handle condition
@@ -35,7 +77,7 @@ class Rule:
         return False
 
     def sync(self, src_issue: Issue, dst_issue: Issue) -> tuple[Issue, Issue]:
-        if self.condition is None:
+        if self.condition is None or self.condition.condition_type == "default":
             newer: Issue
             older: Issue
 

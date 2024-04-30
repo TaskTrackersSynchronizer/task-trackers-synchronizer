@@ -10,5 +10,11 @@ else:
     api = create_api()
 
 
-if __name__ == "__main__":
-    uvicorn.run("main:api")
+# # if __name__ == "__main__":
+# def start():
+#     """Launched with `poetry run start` at root level"""
+#     uvicorn.run("app:main", host="0.0.0.0", port=8000, reload=True)
+
+
+# if __name__ == "main":
+#     uvicorn.run("main:app")

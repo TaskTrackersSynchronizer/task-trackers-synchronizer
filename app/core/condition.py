@@ -7,21 +7,26 @@ from enum import Enum
 class RuleDirection(str, Enum):
     SRC_TO_DEST = "std"
     DEST_TO_SRC = "dts"
-    ANY = "any"
+    ANY = "cmp"
 
 
 @dataclass
-class Condition(ABC):
+class Condition:
     """Interface for the sync condition"""
 
     condition_type: str = "default"
     direction: RuleDirection = RuleDirection.ANY
 
-    @abstractmethod
     def test(self) -> bool:
         return True
 
 
+class DefaultCondition(Condition):
+    def test(self) -> bool:
+        return True
+
+
+# TODO: handle other opeartions based on type
 @dataclass
 class FieldEqualityCondition(Condition):
     source_value: str = ""

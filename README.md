@@ -59,6 +59,15 @@ cd fastapi-starter-template
 docker-compose up
 ```
 
+### Development
+
+For the development purposes, you can run the backend locally as follows:
+```bash
+poetry install . 
+poetry run uvicorn --host 127.0.0.1 --port 3434  app.main:api --reload
+```
+
+
 Afterwards, the project will be live at [http://localhost:5000](http://localhost:5000).
 
 ## Documentation

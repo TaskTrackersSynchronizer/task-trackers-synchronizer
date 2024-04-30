@@ -1,4 +1,6 @@
 from app.core.issues import Issue, DefaultSource
+from app.core.condition import DefaultCondition
+import os
 from app.core.providers import PROVIDER_NAMES
 from abc import ABC, abstractmethod
 from functools import reduce
@@ -160,6 +162,15 @@ class DocumentDatabase(Database):
         self.close()
 
 
+def get_db():
+    db_url = os.getenv("DATABASE_URL", ":memory:")
+    db = DocumentDatabase(db_url)
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 class MockDatabase(Database):
     def __init__(self):
         self._db = {
@@ -190,6 +201,7 @@ class MockDatabase(Database):
                 Rule(
                     source=RuleSide("Gitlab", "KAN", "description"),
                     destination=RuleSide("Jira", "KAN", "description"),
+                    condition=DefaultCondition(),
                 )
             ]
         ]
