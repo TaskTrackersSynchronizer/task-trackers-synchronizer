@@ -30,11 +30,6 @@ class ProjectNamePair:
 
 class Syncer:
     def __init__(self, db: DocumentDatabase) -> None:
-        # self.jira_db = DocumentDatabase(":memory:")
-        # self.gitlab_db = DocumentDatabase(":memory:")
-        # todo: use same db
-        # self.jira_provider: JiraProvider = get_provider(name="jira")
-        # self.gitlab_provider: GitlabProvider = get_provider(name="gitlab")
         self.rules_svc = RulesService(db)
         self.issues_svc = IssuesService(db)
         # todo: renew updated at
@@ -112,8 +107,6 @@ class Syncer:
 
         # TODO: ensure that all pairs are ordered
         for providers_pair in ordered_providers:
-            # src_provider: Provider = get_provider(providers_pair[0])
-            # dst_provider: Provider = get_provider(providers_pair[1])
             projects_pairs: list[
                 ProjectNamePair
             ] = self.get_project_name_pairs_from_rules(
@@ -130,23 +123,5 @@ class Syncer:
                 )
 
                 self.handle_updated_issues(projects_pair)
-            # src_issues = src_provider.get_last_updated_issues(self.updated_at)
-            # dst_issues = dst_provider.get_last_updated_issues(self.updated_at)
-            # recently_updated_issues = src_issues + dst_issues
 
         self.updated_at = datetime.now()
-
-    def sync_minimal(self, src_issues: list[Issue], dst_issues: list[Issue]) -> None:
-        mappings = {
-            src.issue_name: [src, dst]
-            for src in src_issues
-            for dst in dst_issues
-            if src.issue_name == dst.issue_name
-        }
-
-        print(src_issues, dst_issues)
-        print(mappings)
-
-        for src_issue, dst_issue in mappings.values():
-            for rule in self.rules_svc.get_rules():
-                rule.sync(src_issue, dst_issue)
