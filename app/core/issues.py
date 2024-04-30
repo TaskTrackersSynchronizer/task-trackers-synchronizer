@@ -1,38 +1,13 @@
 from gitlab.v4.objects.issues import ProjectIssue as _GitlabIssue
 from jira import Issue as _JiraIssue
 from dataclasses import dataclass, field
-from abc import ABC, abstractmethod
 from datetime import datetime
 from functools import reduce
+
 
 import typing as t
 
 _T = t.TypeVar("_T", bound=object)
-
-
-# @dataclass
-# class MockGitlabIssue:
-#     issue_id: str
-#     issue_name: str
-#     created_at: str
-#     updated_at: str
-#     description: str
-#
-#
-# @dataclass
-# class Field:
-#
-#
-#
-# @dataclass
-# class MockJiraIssue:
-#     fields:
-#     issue_id: str
-#     issue_name: str
-#     created_at: str
-#     updated_at: str
-#     description: str
-#
 
 
 @dataclass
@@ -47,7 +22,12 @@ class ConvertableAttr:
     def resolve_type(self, obj: object) -> t.Type:
         return type(self.resolve_value(obj))
 
-    def set_value(self, obj: object, value: object, unconvert: bool = True) -> None:
+    def set_value(
+        self,
+        obj: object,
+        value: object,
+        unconvert: bool = True,
+    ) -> None:
         attr_split = self.attr.split(".")
         attr_chain, attr_last = attr_split[:-1], attr_split[-1]
         obj_last = reduce(getattr, [obj] + attr_chain)
@@ -92,13 +72,15 @@ class Issue:
         self._source = source
 
         if not all(key in attrs_map.keys() for key in self._default_attrs):
-            raise ValueError("attrs_map is incomplete, please refer to _default_attrs")
+            raise ValueError("attrs_map is incomplete")
 
         self._attrs_map = attrs_map
 
         for key in attrs_map:
             c_attr = self._attrs_map[key]
-            setattr(self, key, c_attr.convert(c_attr.resolve_value(self._source)))
+            setattr(
+                self, key, c_attr.convert(c_attr.resolve_value(self._source))
+            )
 
     def asdict(self) -> dict[str, str]:
         return {
@@ -109,9 +91,44 @@ class Issue:
             and not callable(getattr(value, "__get__", None))
         }
 
-    def import_values(self, data: dict[str, str], convert: bool = True) -> None:
+    @staticmethod
+    def filter_related(
+        src_issues: list["Issue"], dst_issues: list["Issue"]
+    ) -> list["IssuePair"]:
+        related_pairs: list["IssuePair"] = []
+        for src_issue in src_issues:
+            related_issues = [
+                x for x in dst_issues if x.id_field == src_issue.id_field
+            ]
+            if related_issues:
+                related_pairs.append(IssuePair(src_issue, related_issues[0]))
+
+        return related_pairs
+
+    @property
+    def id_field(self) -> str:
+        return "issue_name"
+
+    def is_synced(self, other: "Issue") -> bool:
+        try:
+            other_values = other.export_values(unconvert=False)
+            for f, value in self.export_values(unconvert=False).items():
+                if other_values[f] != value:
+                    return False
+            return True
+        except Exception:
+            return False
+
+    def is_related(self, other: "Issue") -> bool:
+        return self.id_field == other.id_field
+
+    def import_values(
+        self,
+        data: dict[str, str],
+        convert: bool = True,
+    ) -> None:
         if not all(key in self._default_attrs for key in data.keys()):
-            raise ValueError("data is incomplete, please refer to _default_attrs")
+            raise ValueError("data is incomplete")
 
         for key, value in data.items():
             if convert:
@@ -142,14 +159,12 @@ class Issue:
 
         return data
 
-    @abstractmethod
     def update(self) -> None:
         pass
 
 
 class GitlabIssue(Issue):
     def __init__(self, source: _GitlabIssue) -> None:
-        # print(source)
         attrs_map = {
             "issue_id": ConvertableAttr("iid", str, int),
             "issue_name": ConvertableAttr("title"),
@@ -163,15 +178,15 @@ class GitlabIssue(Issue):
                 datetime.fromisoformat,
                 lambda x: x.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             ),
-            "description": ConvertableAttr("title"),
+            "description": ConvertableAttr("description"),
             "labels": ConvertableAttr(
                 "labels",
                 # might be broken if , is used in label name
-                lambda x: x
-                if isinstance(x, list)
-                else ",".join(x)
-                if isinstance(x, str)
-                else [],
+                lambda x: (
+                    x
+                    if isinstance(x, list)
+                    else ",".join(x) if isinstance(x, str) else []
+                ),
                 lambda x: x.split(",") if x is not None else [],
             ),
         }
@@ -192,7 +207,6 @@ class GitlabIssue(Issue):
 
 class JiraIssue(Issue):
     def __init__(self, source: _JiraIssue) -> None:
-        # print(source)
         attrs_map = {
             "issue_id": ConvertableAttr("id"),
             "issue_name": ConvertableAttr("fields.summary"),
@@ -214,11 +228,11 @@ class JiraIssue(Issue):
             "labels": ConvertableAttr(
                 "fields.labels",
                 # might be broken if , is used in label name
-                lambda x: x
-                if isinstance(x, list)
-                else ",".join(x)
-                if isinstance(x, str)
-                else [],
+                lambda x: (
+                    x
+                    if isinstance(x, list)
+                    else ",".join(x) if isinstance(x, str) else []
+                ),
                 lambda x: x.split(",") if x is not None else [],
             ),
         }
@@ -235,3 +249,9 @@ class JiraIssue(Issue):
         )
 
         self._source.update(fields=data)
+
+
+@dataclass
+class IssuePair:
+    src: Issue
+    dst: Issue

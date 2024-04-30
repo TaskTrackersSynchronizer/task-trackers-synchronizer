@@ -1,16 +1,20 @@
+from app.core.condition import Condition, RuleDirection
+from app.core.issues import Issue
 from dataclasses import dataclass
 from typing import Optional
-from app.core.condition import Condition
 from datetime import datetime
-from app.core.issues import Issue
 
 # Rules for synchronization between source and task trackers
+
+
+class SyncError(RuntimeError):
+    pass
 
 
 @dataclass
 class RuleSide:
     tracker: str
-    board: str
+    project: str
     field: str
 
 
@@ -20,16 +24,20 @@ class Rule:
     destination: RuleSide
     condition: Optional[Condition] = None
 
-    # todo move somewhere
-    def get_newer_issue(self, src: Issue, dst: Issue) -> Issue:
-        return dst
+    def is_synced(self, src_issue: Issue, dst_issue: Issue):
+        # TODO: handle condition
+        # if self.condition is None:
 
-    def sync(self, src_issue: Issue, dst_issue: Issue):
+        if getattr(src_issue, self.source.field) == getattr(
+            dst_issue, self.destination.field
+        ):
+            return True
+        return False
+
+    def sync(self, src_issue: Issue, dst_issue: Issue) -> tuple[Issue, Issue]:
         if self.condition is None:
             newer: Issue
             older: Issue
-
-            # datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%S.%f%z')
 
             src_updated_at = src_issue.updated_at
             dst_updated_at = dst_issue.updated_at
@@ -46,22 +54,28 @@ class Rule:
             else:
                 newer, older = dst_issue, src_issue
 
-            setattr(older, self.source.field, getattr(newer, self.destination.field))
+            setattr(
+                older,
+                self.source.field,
+                getattr(newer, self.destination.field),
+            )
+
+            older.update()
+        # TODO: handle condition testing
+        elif self.condition.direction == RuleDirection.SRC_TO_DEST:
+            setattr(
+                dst_issue,
+                self.source.field,
+                getattr(src_issue, self.destination.field),
+            )
+        elif self.condition.direction == RuleDirection.DEST_TO_SRC:
+            setattr(
+                src_issue,
+                self.source.field,
+                getattr(dst_issue, self.destination.field),
+            )
+
+        else:
+            raise SyncError("Unable to resolve sync rule")
 
         return src_issue, dst_issue
-
-    # if sync.
-
-    #     "source": {
-    #     "tracker": "Notion",
-    #     "board": "Task Trackers Synchronizer",
-    #     "field": "Summary",
-    # },
-    # "destination": {
-    #     "tracker": "TaskWarrior",
-    #     "board": "TTS",
-    #     "field": "Description",
-    # },
-    # # default - bidirectional sync
-    # "condition": None,
-    #

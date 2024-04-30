@@ -6,7 +6,7 @@ router = APIRouter()
 
 
 @router.get("/fields/{tracker}")
-def get_fields(tracker: str, board: Optional[str]):
+def get_fields(tracker: str, project: Optional[str]):
     logger.info("Mock get fields")
     return [
         "Name",

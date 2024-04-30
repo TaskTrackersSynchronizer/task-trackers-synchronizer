@@ -23,12 +23,12 @@ def get_rules():
         {
             "source": {
                 "tracker": "Notion",
-                "board": "Task Trackers Synchronizer",
+                "project": "Task Trackers Synchronizer",
                 "field": "Summary",
             },
             "destination": {
                 "tracker": "TaskWarrior",
-                "board": "TTS",
+                "project": "TTS",
                 "field": "Description",
             },
             # default - bidirectional sync
@@ -37,12 +37,12 @@ def get_rules():
         {
             "source": {
                 "tracker": "Notion",
-                "board": "Task Trackers Synchronizer",
+                "project": "Task Trackers Synchronizer",
                 "field": "Tags",
             },
             "destination": {
                 "tracker": "TaskWarrior",
-                "board": "TTS",
+                "project": "TTS",
                 "field": "Tags",
             },
             "condition": None,
@@ -50,15 +50,17 @@ def get_rules():
         {
             "source": {
                 "tracker": "Notion",
-                "board": "Task Trackers Synchronizer",
+                "project": "Task Trackers Synchronizer",
                 "field": "Tags",
             },
             "destination": {
                 "tracker": "TaskWarrior",
-                "board": "TTS",
+                "project": "TTS",
                 "field": "Tags",
             },
-            # If source value is equal "In progress", set destination value to "Doing". Since direction is 0 (Left to right), perform sync only if source value is changed
+            # If source value is equal "In progress", set destination
+            # value to "Doing". Since direction is 0 (Left to right),
+            # perform sync only if source value is changed
             "condition": {
                 "type": "equality",
                 "source_value": "In progress",

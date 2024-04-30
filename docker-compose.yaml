@@ -7,7 +7,40 @@ services:
         ports:
             - '5000:80'
         environment:
-          - MOCK_API=true
+            - MOCK_API=true
         volumes:
             - "./app:/app/app"
         command: /start-reload.sh
+    prometheus:
+        image: prom/prometheus
+        ports:
+            - "9090:9090"
+        volumes:
+            - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    grafana:
+        environment:
+            - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+            - GF_AUTH_ANONYMOUS_ENABLED=true
+            - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+        entrypoint:
+            - sh
+            - -euc
+            - |
+                mkdir -p /etc/grafana/provisioning/datasources
+                cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
+                apiVersion: 1
+                datasources:
+                - name: Prometheus
+                  type: prometheus
+                  access: proxy 
+                  orgId: 1
+                  url: http://prometheus:9090
+                  basicAuth: false
+                  isDefault: true
+                  version: 1
+                  editable: false
+                EOF
+                /run.sh
+        image: grafana/grafana
+        ports:
+            - "3000:3000"
