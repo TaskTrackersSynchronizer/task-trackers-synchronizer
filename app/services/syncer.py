@@ -54,7 +54,9 @@ class Syncer:
                 rule.source.tracker.lower() == src_tracker.lower()
                 and rule.destination.tracker.lower() == dst_tracker.lower()
             ):
-                projects_dict[(rule.source.board, rule.destination.board)].append(rule)
+                projects_dict[(rule.source.project, rule.destination.project)].append(
+                    rule
+                )
 
         logger.info(projects_dict)
         for projects_pair, rules in projects_dict.items():
@@ -84,12 +86,12 @@ class Syncer:
 
                 # TODO: for each issue keep set of related ids
                 related_issue: Optional[Issue] = self.issues_svc.get_related_issue(
-                    issue, rule.destination.board, projects_pairs.dst_provider
+                    issue, rule.destination.project, projects_pairs.dst_provider
                 )
                 if related_issue is None:
                     # related issue didn't exist
-                    # creation is needed
-                    assert False
+                    # TODO: creation is needed
+                    # assert False
                     pass
                 else:
                     rule.sync(issue, related_issue)

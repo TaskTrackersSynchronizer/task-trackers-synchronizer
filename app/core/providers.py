@@ -56,7 +56,7 @@ class GitlabProvider(Provider):
         self, project_name: str, updated_at: Optional[datetime] = None
     ) -> list[GitlabIssue]:
         user_projects = self._user.projects.list(pagination=False)
-        user_project = filter(lambda x: x.name == project_name, user_projects)
+        user_project = next(filter(lambda x: x.name == project_name, user_projects))
 
         if not user_project:
             raise GitlabError("Gitlab project not found")
@@ -67,6 +67,8 @@ class GitlabProvider(Provider):
         else:
             issues = project.issues.list(pagination=False)
 
+        if len(issues) == 0:
+            return []
         return list(map(GitlabIssue, issues))
 
     def get_last_updated_issues(
@@ -101,7 +103,9 @@ class GitlabProvider(Provider):
         issue = project.issues.list(pagination=False, title=issue_name)
 
         if type(issue) == list:
-            return GitlabIssue(issue[0])
+            if len(issue) > 0:
+                return GitlabIssue(issue[0])
+            return None
         elif issue:
             return GitlabIssue(issue)
         else:
@@ -124,7 +128,9 @@ class JiraProvider(Provider):
         )
         logger.debug(issues)
         if type(issues) == list:
-            return issues[0]
+            if len(issues) > 0:
+                return issues[0]
+            return None
         return issues
 
     # todo: allow fetching from list of projects
@@ -169,4 +175,4 @@ PROVIDER_NAMES = list(PROVIDERS_OBJS.keys())
 
 
 def get_provider(provider_name: str) -> Provider:
-    return PROVIDERS_OBJS[provider_name].get_instance()
+    return PROVIDERS_OBJS[provider_name.lower()].get_instance()
