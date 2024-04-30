@@ -46,7 +46,9 @@ class Syncer:
 
         logger.debug(f"get_project_name_pairs_from_rules rules: {rules}")
         logger.debug(
-            f"get_project_name_pairs_from_rules src_tracker: {src_tracker}, dst_tracler: {dst_tracker}"
+            f"""get_project_name_pairs_from_rules\
+            src_tracker: {src_tracker},\
+            dst_tracler: {dst_tracker}"""
         )
         rule: Rule
         for rule in rules:
@@ -54,9 +56,9 @@ class Syncer:
                 rule.source.tracker.lower() == src_tracker.lower()
                 and rule.destination.tracker.lower() == dst_tracker.lower()
             ):
-                projects_dict[(rule.source.project, rule.destination.project)].append(
-                    rule
-                )
+                projects_dict[
+                    (rule.source.project, rule.destination.project)
+                ].append(rule)
 
         logger.info(projects_dict)
         for projects_pair, rules in projects_dict.items():
@@ -72,9 +74,10 @@ class Syncer:
 
         return relevant_projects
 
-    # - We assume that script runs quick enough so issue is updated only at one side
-    # - We assume that issues between two projects within same provider are not synced
-    # - We assume that there can be only one related issue in a pair of two  project providers
+    # - assume script runs quick enough so issue is updated only at one side
+    # - assume issues between two projects within same provider are not synced
+    # - assume there can be only one related issue
+    #   in a pair of two  project providers
     def handle_updated_issues(self, projects_pairs: ProjectNamePair):
         projects_pairs.issues.sort(key=lambda x: x.updated_at)
         assert len(projects_pairs.issues) > 0
@@ -85,8 +88,10 @@ class Syncer:
                 # TODO: fetch local
 
                 # TODO: for each issue keep set of related ids
-                related_issue: Optional[Issue] = self.issues_svc.get_related_issue(
-                    issue, rule.destination.project, projects_pairs.dst_provider
+                related_issue: Optional[Issue] = \
+                    self.issues_svc.get_related_issue(
+                    issue, rule.destination.project,
+                    projects_pairs.dst_provider
                 )
                 if related_issue is None:
                     # related issue didn't exist
@@ -116,13 +121,15 @@ class Syncer:
             )
 
             for projects_pair in projects_pairs:
-                projects_pair.issues += projects_pair.src_provider.get_project_issues(
-                    projects_pair.src_project, updated_at=self.updated_at
-                )
+                projects_pair.issues += \
+                    projects_pair.src_provider.get_project_issues(
+                        projects_pair.src_project, updated_at=self.updated_at
+                    )
 
-                projects_pair.issues += projects_pair.dst_provider.get_project_issues(
-                    projects_pair.dst_project, updated_at=self.updated_at
-                )
+                projects_pair.issues += \
+                    projects_pair.dst_provider.get_project_issues(
+                        projects_pair.dst_project, updated_at=self.updated_at
+                    )
 
                 self.handle_updated_issues(projects_pair)
 

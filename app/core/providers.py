@@ -18,12 +18,7 @@ load_dotenv()
 # mock default creds are used. TODO: parametrize
 JIRA_SERVER = os.environ.get("JIRA_SERVER", "https://0xf1o2732.atlassian.net")
 JIRA_EMAIL = os.environ.get("JIRA_EMAIL", "0xf1o2732@proton.me")
-JIRA_API_TOKEN = os.environ.get("JIRA_API_TOKEN", "")
-
 GITLAB_SERVER = os.environ.get("GITLAB_SERVER", "https://gitlab.com")
-GITLAB_API_TOKEN = os.environ.get("GITLAB_API_TOKEN", "")
-assert GITLAB_API_TOKEN, "GITLAB_API_TOKEN is not set"
-assert JIRA_API_TOKEN, "JIRA_API_TOKEN is not set"
 
 
 class Provider(ABC):
@@ -47,6 +42,8 @@ class Provider(ABC):
 @pytest.mark.integration
 class GitlabProvider(Provider):
     def __init__(self) -> None:
+        GITLAB_API_TOKEN = os.environ.get("GITLAB_API_TOKEN", "")
+        assert GITLAB_API_TOKEN, "GITLAB_API_TOKEN is not set"
         self._client = Gitlab(url=GITLAB_SERVER, oauth_token=GITLAB_API_TOKEN)
         self._client.auth()
 
@@ -107,7 +104,7 @@ class GitlabProvider(Provider):
         project = self._client.projects.get(user_project.id)
         issue = project.issues.list(pagination=False, title=issue_name)
 
-        if type(issue) == list:
+        if isinstance(issue, list):
             if len(issue) > 0:
                 return GitlabIssue(issue[0])
             return None
@@ -119,6 +116,8 @@ class GitlabProvider(Provider):
 
 class JiraProvider(Provider):
     def __init__(self) -> None:
+        JIRA_API_TOKEN = os.environ.get("JIRA_API_TOKEN", "")
+        assert JIRA_API_TOKEN, "JIRA_API_TOKEN is not set"
         self._client = JIRA(server=JIRA_SERVER, basic_auth=(
             JIRA_EMAIL, JIRA_API_TOKEN))
 
@@ -133,7 +132,7 @@ class JiraProvider(Provider):
             f'project = "{project_name}" AND summary ~ "{issue_name}"'
         )
         logger.debug(issues)
-        if type(issues) == list:
+        if isinstance(issues, list):
             if len(issues) > 0:
                 return issues[0]
             return None
