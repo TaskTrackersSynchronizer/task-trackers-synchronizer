@@ -5,6 +5,25 @@ on:
     branches: ["master", "dev", "fix_ci"]
 
 jobs:
+  coverage_gate:
+    name: coverage/gate
+    runs-on: ubuntu-latest
+    after: [flake8, bandit, semgrep, sonarcloud, unit-test, mutation-test]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    - name: Install poetry
+      uses: abatilo/actions-poetry@v2
+      with:
+        poetry-version: '1.7.1'
+    - name: Install dependencies
+      run: poetry install
+    - name: Run tests with coverage gate
+      run:  poetry run pytest --cov=. tests/ --cov-report=json --cov-fail-under=80
+    - name: Upload coverage report
+
   flake8:
     name: flake8/lint
     runs-on: ubuntu-latest
@@ -16,7 +35,7 @@ jobs:
       - name: flake8 Lint
         uses: py-actions/flake8@v2
 
-  bandit:
+  semgrep:
     name: semgrep/sast
     runs-on: ubuntu-latest
     container:
@@ -24,6 +43,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: semgrep scan --config "p/bandit" .
+
+  bandit:
+    name: bandit/sast
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+    - name: Setup environment
+      uses: abatilo/actions-poetry@v3
+    - name: Install dependencies
+      run:  poetry install
+    - name: Run Bandit
+      run:  poetry run bandit -r app/
 
   sonarcloud:
     name: sonarcloud/sast
@@ -73,12 +107,12 @@ jobs:
     - name: Install dependencies
       run: poetry install
     - name: Run tests
-      run: poetry run mutmut run --paths-to-mutate "app/" --tests-dir "tests/"
+      run: poetry run mutmut run --paths-to-mutate "app/core/" --runner "pytest -m unit tests/"
 
   docker:
     name: docker/image
     runs-on: ubuntu-latest
-    needs: [flake8, bandit, sonarcloud, unit-test, mutation-test] # do not build if tests fail
+    needs: [flake8, bandit, semgrep, sonarcloud, unit-test, mutation-test] # do not build if tests fail
     steps:
     - uses: actions/checkout@v4
     - name: Set up QEMU

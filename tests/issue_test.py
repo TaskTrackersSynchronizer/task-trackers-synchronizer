@@ -84,7 +84,7 @@ def test_gitlab_get_issue_by_name():
 
     issue = provider.get_project_issue_by_name("KAN", "name")
     assert issue is not None
-    assert gitlab_issue.issue_name == "name"
+    assert issue.issue_name == "name"
 
 
 def test_jira_get_issue_by_name():

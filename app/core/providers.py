@@ -63,8 +63,6 @@ class GitlabProvider(Provider):
         if not user_project:
             raise GitlabError("Gitlab project not found")
 
-        user_project = next(user_project)
-
         project = self._client.projects.get(user_project.id)
         if updated_at is not None:
             issues = project.issues.list(pagination=False, updated_after=updated_at)
