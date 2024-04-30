@@ -58,14 +58,16 @@ class GitlabProvider(Provider):
         self, project_name: str, updated_at: Optional[datetime] = None
     ) -> list[GitlabIssue]:
         user_projects = self._user.projects.list(pagination=False)
-        user_project = next(filter(lambda x: x.name == project_name, user_projects))
+        user_project = next(
+            filter(lambda x: x.name == project_name, user_projects))
 
         if not user_project:
             raise GitlabError("Gitlab project not found")
 
         project = self._client.projects.get(user_project.id)
         if updated_at is not None:
-            issues = project.issues.list(pagination=False, updated_after=updated_at)
+            issues = project.issues.list(
+                pagination=False, updated_after=updated_at)
         else:
             issues = project.issues.list(pagination=False)
 
@@ -96,7 +98,8 @@ class GitlabProvider(Provider):
         self, project_name: str, issue_name: str
     ) -> Optional[Issue]:
         user_projects = self._user.projects.list(pagination=False)
-        user_project = next(filter(lambda x: x.name == project_name, user_projects))
+        user_project = next(
+            filter(lambda x: x.name == project_name, user_projects))
 
         if not user_project:
             raise GitlabError("Gitlab project not found")
@@ -116,7 +119,8 @@ class GitlabProvider(Provider):
 
 class JiraProvider(Provider):
     def __init__(self) -> None:
-        self._client = JIRA(server=JIRA_SERVER, basic_auth=(JIRA_EMAIL, JIRA_API_TOKEN))
+        self._client = JIRA(server=JIRA_SERVER, basic_auth=(
+            JIRA_EMAIL, JIRA_API_TOKEN))
 
     def get_issues(self, query: str = "") -> list[JiraIssue]:
         issues = self._client.search_issues(query)
