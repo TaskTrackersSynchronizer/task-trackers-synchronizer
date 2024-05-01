@@ -1,3 +1,5 @@
+import tempfile
+
 from app.core.issues import Issue, DefaultSource
 from app.core.condition import DefaultCondition
 import os
@@ -61,6 +63,7 @@ class DocumentDatabase(Database):
         for table_name in self.TABLES.keys():
             query = f"CREATE TABLE IF NOT EXISTS {table_name} (data TEXT);"
             self._db.execute(query)
+            self._db.commit()
 
     def _check_table(self, table_name: str) -> None:
         """
@@ -88,6 +91,7 @@ class DocumentDatabase(Database):
         self._check_table(table_name)
         query = f"INSERT INTO {table_name} VALUES (?);"
         self._db.execute(query, (json.dumps(row),))
+        self._db.commit()
 
     def add_all(self, table_name: str, rows: list[dict]) -> None:
         """
@@ -105,6 +109,7 @@ class DocumentDatabase(Database):
         :param table_name: name of the table
         :return: list of dictionaries representing the rows in the table
         """
+        self._db.commit()
         self._check_table(table_name)
         results = []
         for r in self._db.execute(f"SELECT * FROM {table_name}"):
@@ -162,8 +167,11 @@ class DocumentDatabase(Database):
         self.close()
 
 
+tempDb = tempfile.mktemp()
+
+
 def get_db():
-    db_url = os.getenv("DATABASE_URL", ":memory:")
+    db_url = os.getenv("DATABASE_URL", tempDb)
     db = DocumentDatabase(db_url)
     try:
         yield db

@@ -1,3 +1,6 @@
+import dacite
+
+from app.core.condition import RuleDirection
 from app.core.db import Database
 from app.core.rule import Rule, RuleDTO
 from dataclasses import asdict
@@ -7,7 +10,9 @@ from dacite import from_dict
 def get_rules(db: Database) -> list[RuleDTO]:
     rules_dicts: list[dict] = db.get_all("rules")
     dtos: list[RuleDTO] = [
-        RuleDTO.from_rule(from_dict(data=x, data_class=Rule)) for x in rules_dicts
+        RuleDTO.from_rule(
+            from_dict(data=x, data_class=Rule, config=dacite.Config(type_hooks={RuleDirection: RuleDirection}), )) for x
+        in rules_dicts
     ]
 
     return dtos

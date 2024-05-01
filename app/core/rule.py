@@ -13,7 +13,7 @@ class SyncError(RuntimeError):
 
 
 @dataclass
-class FieldFilter(BaseModel):
+class FieldFilter:
     tracker: str
     board: str
     field_name: str
@@ -22,7 +22,7 @@ class FieldFilter(BaseModel):
 
 
 @dataclass
-class RuleDTO(BaseModel):
+class RuleDTO:
     source: FieldFilter
     destination: FieldFilter
     direction: RuleDirection
