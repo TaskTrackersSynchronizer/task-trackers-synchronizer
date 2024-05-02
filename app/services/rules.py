@@ -10,7 +10,10 @@ class RulesService:
 
     def get_rules(self) -> list[Rule]:
         rules_dicts: list[dict] = self._db.get_all("rules")
-        rules: list[Rule] = [from_dict(data=x, data_class=Rule) for x in rules_dicts]
+        rules: list[Rule] = [
+            from_dict(data=x, data_class=Rule)
+            for x in rules_dicts
+        ]
         return rules
 
     def add_rule(self, rule: Rule):

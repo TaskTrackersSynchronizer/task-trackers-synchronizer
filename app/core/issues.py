@@ -131,8 +131,10 @@ class Issue:
             raise ValueError("data is incomplete")
 
         for key, value in data.items():
+            c_attr = self._attrs_map[key]
+            c_attr.set_value(self._source, value)
+
             if convert:
-                c_attr = self._attrs_map[key]
                 setattr(self, key, c_attr.convert(value))
             else:
                 setattr(self, key, value)
@@ -164,8 +166,7 @@ class Issue:
 
 
 class GitlabIssue(Issue):
-    def __init__(self, source: _GitlabIssue) -> None:
-        attrs_map = {
+    ATTRS_MAP = {
             "issue_id": ConvertableAttr("iid", str, int),
             "issue_name": ConvertableAttr("title"),
             "created_at": ConvertableAttr(
@@ -191,7 +192,8 @@ class GitlabIssue(Issue):
             ),
         }
 
-        super().__init__(source, attrs_map)
+    def __init__(self, source: _GitlabIssue) -> None:
+        super().__init__(source, GitlabIssue.ATTRS_MAP)
 
     def update(self) -> None:
         data = self.export_values(
@@ -206,8 +208,7 @@ class GitlabIssue(Issue):
 
 
 class JiraIssue(Issue):
-    def __init__(self, source: _JiraIssue) -> None:
-        attrs_map = {
+    ATTRS_MAP = {
             "issue_id": ConvertableAttr("id"),
             "issue_name": ConvertableAttr("fields.summary"),
             "created_at": ConvertableAttr(
@@ -237,14 +238,15 @@ class JiraIssue(Issue):
             ),
         }
 
-        super().__init__(source, attrs_map)
+    def __init__(self, source: _JiraIssue) -> None:
+        super().__init__(source, JiraIssue.ATTRS_MAP)
 
-    def _key_converter(self, key: str) -> str:
-        return self._attrs_map[key].attr.replace("fields.", "")
+    def key_converter(key: str) -> str:
+        return JiraIssue.ATTRS_MAP[key].attr.replace("fields.", "")
 
     def update(self) -> None:
         data = self.export_values(
-            key_converter=self._key_converter,
+            key_converter=JiraIssue.key_converter,
             exclude_fields=["issue_id", "created_at", "updated_at"],
         )
 

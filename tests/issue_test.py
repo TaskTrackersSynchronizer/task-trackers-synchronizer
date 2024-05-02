@@ -77,11 +77,9 @@ def test_gitlab_get_last_updated_at():
 
     print(f"issues: {issues} size: {len(issues)}")
 
-    # updated_at: str = "2024-04-27 05:01:16"
-
 
 def test_gitlab_get_issue_by_name():
-    provider: GitlabProvider = get_provider("gitlab")
+    provider: Provider = get_provider("gitlab")
 
     issue = provider.get_project_issue_by_name("KAN", "name")
     assert issue is not None

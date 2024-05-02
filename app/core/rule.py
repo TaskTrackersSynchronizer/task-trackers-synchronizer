@@ -1,9 +1,7 @@
 from app.core.condition import Condition, RuleDirection, DefaultCondition
 from app.core.issues import Issue
 from dataclasses import dataclass, field
-from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel
 
 # Rules for synchronization between source and task trackers
 
@@ -95,7 +93,7 @@ class Rule:
         return False
 
     def sync(self, src_issue: Issue, dst_issue: Issue) -> tuple[Issue, Issue]:
-        if self.condition is None or self.condition.condition_type == "default":
+        if not self.condition or self.condition.condition_type == "default":
             newer: Issue
             older: Issue
 

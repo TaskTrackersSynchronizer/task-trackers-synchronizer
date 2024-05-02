@@ -1,16 +1,11 @@
 # TODO: error on POSt when rule with  source / dest fields exist
 
-
 from fastapi import APIRouter
 from app.core.db import DocumentDatabase
-from app.core.logger import logger
-from app.core.providers import Provider, get_provider
-from app.core.rule import Rule, RuleDTO
-from fastapi import Depends, FastAPI, HTTPException
+from app.core.rule import RuleDTO
+from fastapi import Depends
 from app.core.db import get_db
 import app.api.crud as crud
-
-import typing as t
 
 router = APIRouter()
 

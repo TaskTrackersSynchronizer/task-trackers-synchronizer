@@ -29,7 +29,9 @@ class Provider(ABC):
         pass
 
     @abstractmethod
-    def get_last_updated_issues(self, updated_at: datetime) -> list[Issue]:
+    def get_last_updated_issues(
+        self, updated_at: datetime
+    ) -> list[Issue]:
         pass
 
     @abstractmethod
@@ -37,6 +39,14 @@ class Provider(ABC):
         self, project_name: str, issue_name: str
     ) -> Optional[Issue]:
         pass
+
+    # @abstractmethod
+    # def create_issue(project_name: str, values: dict) -> Issue:
+    #     pass
+
+    # @abstractmethod
+    # def update_issue(issue: Issue) -> None:
+    #     pass
 
 
 @pytest.mark.integration
@@ -87,10 +97,6 @@ class GitlabProvider(Provider):
 
         return list(map(GitlabIssue, issues))
 
-    def get_issues(self, query: str = "") -> list[GitlabIssue]:
-        # TODO: refactor this shit somebody if you care
-        return self.get_last_updated_issues()
-
     def get_project_issue_by_name(
         self, project_name: str, issue_name: str
     ) -> Optional[Issue]:
@@ -121,14 +127,14 @@ class JiraProvider(Provider):
         self._client = JIRA(server=JIRA_SERVER, basic_auth=(
             JIRA_EMAIL, JIRA_API_TOKEN))
 
-    def get_issues(self, query: str = "") -> list[JiraIssue]:
+    def _get_issues_by_query(self, query: str) -> list[JiraIssue]:
         issues = self._client.search_issues(query)
         return list(map(JiraIssue, issues))
 
     def get_project_issue_by_name(
         self, project_name: str, issue_name: str
     ) -> Optional[Issue]:
-        issues = self.get_issues(
+        issues = self._get_issues_by_query(
             f'project = "{project_name}" AND summary ~ "{issue_name}"'
         )
         logger.debug(issues)
@@ -149,14 +155,16 @@ class JiraProvider(Provider):
         query = f'project = "{project_name}"'
         if updated_at is not None:
             updated_at_str = updated_at.strftime("%Y-%m-%d %H:%M")
-            query += f" AND updated>='{updated_at_str}'"
-        issues = self.get_issues(query)
+            query += f" AND updated >= '{updated_at_str}'"
+        issues = self._get_issues_by_query(query)
         return issues
 
-    def get_last_updated_issues(self, updated_at: datetime) -> list[JiraIssue]:
+    def get_last_updated_issues(
+        self, updated_at: datetime = datetime.fromtimestamp(0)
+    ) -> list[JiraIssue]:
         updated_at_str = updated_at.strftime("%Y-%m-%d %H:%M")
 
-        return self.get_issues(f"updated>='{updated_at_str}'")
+        return self._get_issues_by_query(f"updated>='{updated_at_str}'")
 
 
 class SingletonObject:
