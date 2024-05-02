@@ -22,10 +22,11 @@ def test_syncs_existing():
     jira_provider = get_provider("Jira")
     gitlab_provider = get_provider("Gitlab")
 
-    def get_unsynced_issues(    # updated_at: str = "2024-04-27 05:01:16"
-src_issues, dst_issues) -> list[Issue]:
+    def get_unsynced_issues(src_issues, dst_issues) -> list[Issue]:
         related_issues: list[IssuePair] = Issue.filter_related(
-            src_issues, dst_issues)
+            src_issues, dst_issues
+        )
+
         unsynced_issues = []
         for rule in rules:
             for issue_pair in related_issues:
@@ -56,6 +57,11 @@ src_issues, dst_issues) -> list[Issue]:
 
     def recover_issues(issues: list[Issue], old_issues_map: dict[str, Issue]):
         for issue in issues:
+
+            if issue.issue_name not in old_issues_map:
+                issue.delete()
+                continue
+
             exported = old_issues_map[issue.issue_name].export_values(unconvert=False)
             issue.import_values(exported, convert=False)
             issue.update()

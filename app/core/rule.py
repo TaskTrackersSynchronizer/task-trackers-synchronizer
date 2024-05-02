@@ -82,15 +82,18 @@ class Rule:
         )
         return rule
 
-    def is_synced(self, src_issue: Issue, dst_issue: Issue):
+    def is_synced(self, src_issue: Issue, dst_issue: Issue) -> bool:
         # TODO: handle condition
         # if self.condition is None:
 
-        if getattr(src_issue, self.source.field) == getattr(
-            dst_issue, self.destination.field
-        ):
-            return True
-        return False
+        if src_issue is None and dst_issue is None:
+            raise ValueError("At leat one of issues must not be NoneType")
+
+        if dst_issue is None or src_issue is None:
+            return False
+
+        return getattr(src_issue, self.source.field) == \
+            getattr(dst_issue, self.destination.field)
 
     def sync(self, src_issue: Issue, dst_issue: Issue) -> tuple[Issue, Issue]:
         if not self.condition or self.condition.condition_type == "default":
