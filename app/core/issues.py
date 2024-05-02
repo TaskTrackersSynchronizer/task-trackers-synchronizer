@@ -3,7 +3,7 @@ from jira import Issue as _JiraIssue
 from dataclasses import dataclass, field
 from datetime import datetime
 from functools import reduce
-
+from collections import defaultdict
 
 import typing as t
 
@@ -43,6 +43,9 @@ DEFAULT_ATTRS_MAP = {
     "updated_at": ConvertableAttr("updated_at"),
     "description": ConvertableAttr("description"),
 }
+
+
+DEFAULT_EXCLUDE_FIELDS = ["issue_id", "created_at", "updated_at"]
 
 
 @dataclass
@@ -95,13 +98,20 @@ class Issue:
     def filter_related(
         src_issues: list["Issue"], dst_issues: list["Issue"]
     ) -> list["IssuePair"]:
-        related_pairs: list["IssuePair"] = []
+        issue_name_map: dict[str, list["Issue"]] = defaultdict(
+            lambda: [None, None],
+        )
+
         for src_issue in src_issues:
-            related_issues = [
-                x for x in dst_issues if x.id_field == src_issue.id_field
-            ]
-            if related_issues:
-                related_pairs.append(IssuePair(src_issue, related_issues[0]))
+            issue_name_map[src_issue.issue_name][0] = src_issue
+        
+        for dst_issue in dst_issues:
+            issue_name_map[dst_issue.issue_name][1] = dst_issue
+
+        related_pairs: list["IssuePair"] = [
+            IssuePair(x[0], x[1])
+            for x in issue_name_map.values()
+        ]
 
         return related_pairs
 
@@ -110,6 +120,9 @@ class Issue:
         return "issue_name"
 
     def is_synced(self, other: "Issue") -> bool:
+        if other is None:
+            return False
+
         try:
             other_values = other.export_values(unconvert=False)
             for f, value in self.export_values(unconvert=False).items():
@@ -131,8 +144,10 @@ class Issue:
             raise ValueError("data is incomplete")
 
         for key, value in data.items():
+            c_attr = self._attrs_map[key]
+            c_attr.set_value(self._source, value)
+
             if convert:
-                c_attr = self._attrs_map[key]
                 setattr(self, key, c_attr.convert(value))
             else:
                 setattr(self, key, value)
@@ -162,10 +177,12 @@ class Issue:
     def update(self) -> None:
         pass
 
+    def delete(self) -> None:
+        pass
+
 
 class GitlabIssue(Issue):
-    def __init__(self, source: _GitlabIssue) -> None:
-        attrs_map = {
+    ATTRS_MAP = {
             "issue_id": ConvertableAttr("iid", str, int),
             "issue_name": ConvertableAttr("title"),
             "created_at": ConvertableAttr(
@@ -191,7 +208,8 @@ class GitlabIssue(Issue):
             ),
         }
 
-        super().__init__(source, attrs_map)
+    def __init__(self, source: _GitlabIssue) -> None:
+        super().__init__(source, GitlabIssue.ATTRS_MAP)
 
     def update(self) -> None:
         data = self.export_values(
@@ -203,11 +221,13 @@ class GitlabIssue(Issue):
             c_attr.set_value(self._source, value)
 
         self._source.save()
+    
+    def delete(self) -> None:
+        self._source.delete()
 
 
 class JiraIssue(Issue):
-    def __init__(self, source: _JiraIssue) -> None:
-        attrs_map = {
+    ATTRS_MAP = {
             "issue_id": ConvertableAttr("id"),
             "issue_name": ConvertableAttr("fields.summary"),
             "created_at": ConvertableAttr(
@@ -237,21 +257,25 @@ class JiraIssue(Issue):
             ),
         }
 
-        super().__init__(source, attrs_map)
+    def __init__(self, source: _JiraIssue) -> None:
+        super().__init__(source, JiraIssue.ATTRS_MAP)
 
-    def _key_converter(self, key: str) -> str:
-        return self._attrs_map[key].attr.replace("fields.", "")
+    def key_converter(key: str) -> str:
+        return JiraIssue.ATTRS_MAP[key].attr.replace("fields.", "")
 
     def update(self) -> None:
         data = self.export_values(
-            key_converter=self._key_converter,
-            exclude_fields=["issue_id", "created_at", "updated_at"],
+            key_converter=JiraIssue.key_converter,
+            exclude_fields=DEFAULT_EXCLUDE_FIELDS,
         )
 
         self._source.update(fields=data)
+    
+    def delete(self) -> None:
+        self._source.delete()
 
 
 @dataclass
 class IssuePair:
-    src: Issue
-    dst: Issue
+    src: t.Optional[Issue] = field(default=None)
+    dst: t.Optional[Issue] = field(default=None)

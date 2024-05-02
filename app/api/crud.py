@@ -9,10 +9,17 @@ from dacite import from_dict
 
 def get_rules(db: Database) -> list[RuleDTO]:
     rules_dicts: list[dict] = db.get_all("rules")
+    type_hooks = {RuleDirection: RuleDirection}
+
     dtos: list[RuleDTO] = [
         RuleDTO.from_rule(
-            from_dict(data=x, data_class=Rule, config=dacite.Config(type_hooks={RuleDirection: RuleDirection}), )) for x
-        in rules_dicts
+            from_dict(
+                data=x,
+                data_class=Rule,
+                config=dacite.Config(type_hooks=type_hooks),
+            )
+        )
+        for x in rules_dicts
     ]
 
     return dtos

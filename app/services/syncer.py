@@ -94,10 +94,18 @@ class Syncer:
                     projects_pairs.dst_provider
                 )
                 if related_issue is None:
-                    # related issue didn't exist
-                    # TODO: creation is needed
-                    # assert False
-                    pass
+                    related_issue = projects_pairs.dst_provider.create_issue(
+                        rule.destination.project,
+                        issue.issue_name,
+                    )
+
+                    related_issue.import_values(
+                        issue.export_values(unconvert=False),
+                        convert=False,
+                    )
+
+                    related_issue.update()
+                    
                 else:
                     rule.sync(issue, related_issue)
 
