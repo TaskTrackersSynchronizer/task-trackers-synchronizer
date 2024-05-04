@@ -6,8 +6,6 @@ services:
         build: .
         ports:
             - '5000:80'
-        environment:
-            - MOCK_API=true
         volumes:
             - "./app:/app/app"
         command: /start-reload.sh
