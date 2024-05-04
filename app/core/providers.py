@@ -7,9 +7,7 @@ from datetime import datetime
 import pytest
 from app.core.logger import logger
 
-from app.core.issues import (
-    Issue, JiraIssue, GitlabIssue, DEFAULT_EXCLUDE_FIELDS
-)
+from app.core.issues import Issue, JiraIssue, GitlabIssue, DEFAULT_EXCLUDE_FIELDS
 
 import typing as t
 import re
@@ -33,9 +31,7 @@ class Provider(ABC):
         pass
 
     @abstractmethod
-    def get_last_updated_issues(
-        self, updated_at: datetime
-    ) -> list[Issue]:
+    def get_last_updated_issues(self, updated_at: datetime) -> list[Issue]:
         pass
 
     @abstractmethod
@@ -60,11 +56,10 @@ class GitlabProvider(Provider):
         self._user_id = self._client.user.id
         self._issues_api = self._client.issues
         self._user = self._client.users.get(self._user_id)
-    
+
     def _get_project(self, project_name: str) -> _GitlabProject:
         user_projects = self._user.projects.list(pagination=False)
-        user_project = next(
-            filter(lambda x: x.name == project_name, user_projects))
+        user_project = next(filter(lambda x: x.name == project_name, user_projects))
 
         if not user_project:
             raise GitlabError("Gitlab project not found")
@@ -77,8 +72,7 @@ class GitlabProvider(Provider):
         project = self._get_project(project_name)
 
         if updated_at is not None:
-            issues = project.issues.list(
-                pagination=False, updated_after=updated_at)
+            issues = project.issues.list(pagination=False, updated_after=updated_at)
         else:
             issues = project.issues.list(pagination=False)
 
@@ -105,8 +99,7 @@ class GitlabProvider(Provider):
         self, project_name: str, issue_name: str
     ) -> Optional[Issue]:
         user_projects = self._user.projects.list(pagination=False)
-        user_project = next(
-            filter(lambda x: x.name == project_name, user_projects))
+        user_project = next(filter(lambda x: x.name == project_name, user_projects))
 
         if not user_project:
             raise GitlabError("Gitlab project not found")
@@ -115,7 +108,7 @@ class GitlabProvider(Provider):
         issue = project.issues.list(
             pagination=False,
             title=issue_name,
-            order_by='created_at',
+            order_by="created_at",
             sort="asc",
         )
 
@@ -129,10 +122,10 @@ class GitlabProvider(Provider):
             return GitlabIssue(issue)
         else:
             return None
-    
+
     def create_issue(self, project_name: str, issue_name: str) -> GitlabIssue:
         project = self._get_project(project_name)
-        
+
         values = {}
         values["title"] = issue_name
 
@@ -144,8 +137,7 @@ class JiraProvider(Provider):
     def __init__(self) -> None:
         JIRA_API_TOKEN = os.environ.get("JIRA_API_TOKEN", "")
         assert JIRA_API_TOKEN, "JIRA_API_TOKEN is not set"
-        self._client = JIRA(server=JIRA_SERVER, basic_auth=(
-            JIRA_EMAIL, JIRA_API_TOKEN))
+        self._client = JIRA(server=JIRA_SERVER, basic_auth=(JIRA_EMAIL, JIRA_API_TOKEN))
 
     def _get_issues_by_query(self, query: str) -> list[JiraIssue]:
         issues = self._client.search_issues(query)
@@ -185,7 +177,7 @@ class JiraProvider(Provider):
         updated_at_str = updated_at.strftime("%Y-%m-%d %H:%M")
 
         return self._get_issues_by_query(f"updated>='{updated_at_str}'")
-    
+
     def create_issue(self, project_name: str, issue_name: str) -> Issue:
         values = {}
         values["project"] = {"key": project_name}

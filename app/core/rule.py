@@ -92,8 +92,9 @@ class Rule:
         if dst_issue is None or src_issue is None:
             return False
 
-        return getattr(src_issue, self.source.field) == \
-            getattr(dst_issue, self.destination.field)
+        return getattr(src_issue, self.source.field) == getattr(
+            dst_issue, self.destination.field
+        )
 
     def sync(self, src_issue: Issue, dst_issue: Issue) -> tuple[Issue, Issue]:
         if not self.condition or self.condition.condition_type == "default":

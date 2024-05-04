@@ -81,9 +81,7 @@ class Issue:
 
         for key in attrs_map:
             c_attr = self._attrs_map[key]
-            setattr(
-                self, key, c_attr.convert(c_attr.resolve_value(self._source))
-            )
+            setattr(self, key, c_attr.convert(c_attr.resolve_value(self._source)))
 
     def asdict(self) -> dict[str, str]:
         return {
@@ -104,13 +102,12 @@ class Issue:
 
         for src_issue in src_issues:
             issue_name_map[src_issue.issue_name][0] = src_issue
-        
+
         for dst_issue in dst_issues:
             issue_name_map[dst_issue.issue_name][1] = dst_issue
 
         related_pairs: list["IssuePair"] = [
-            IssuePair(x[0], x[1])
-            for x in issue_name_map.values()
+            IssuePair(x[0], x[1]) for x in issue_name_map.values()
         ]
 
         return related_pairs
@@ -183,30 +180,28 @@ class Issue:
 
 class GitlabIssue(Issue):
     ATTRS_MAP = {
-            "issue_id": ConvertableAttr("iid", str, int),
-            "issue_name": ConvertableAttr("title"),
-            "created_at": ConvertableAttr(
-                "created_at",
-                datetime.fromisoformat,
-                lambda x: x.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+        "issue_id": ConvertableAttr("iid", str, int),
+        "issue_name": ConvertableAttr("title"),
+        "created_at": ConvertableAttr(
+            "created_at",
+            datetime.fromisoformat,
+            lambda x: x.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+        ),
+        "updated_at": ConvertableAttr(
+            "updated_at",
+            datetime.fromisoformat,
+            lambda x: x.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+        ),
+        "description": ConvertableAttr("description"),
+        "labels": ConvertableAttr(
+            "labels",
+            # might be broken if , is used in label name
+            lambda x: (
+                x if isinstance(x, list) else ",".join(x) if isinstance(x, str) else []
             ),
-            "updated_at": ConvertableAttr(
-                "updated_at",
-                datetime.fromisoformat,
-                lambda x: x.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-            ),
-            "description": ConvertableAttr("description"),
-            "labels": ConvertableAttr(
-                "labels",
-                # might be broken if , is used in label name
-                lambda x: (
-                    x
-                    if isinstance(x, list)
-                    else ",".join(x) if isinstance(x, str) else []
-                ),
-                lambda x: x.split(",") if x is not None else [],
-            ),
-        }
+            lambda x: x.split(",") if x is not None else [],
+        ),
+    }
 
     def __init__(self, source: _GitlabIssue) -> None:
         super().__init__(source, GitlabIssue.ATTRS_MAP)
@@ -221,41 +216,39 @@ class GitlabIssue(Issue):
             c_attr.set_value(self._source, value)
 
         self._source.save()
-    
+
     def delete(self) -> None:
         self._source.delete()
 
 
 class JiraIssue(Issue):
     ATTRS_MAP = {
-            "issue_id": ConvertableAttr("id"),
-            "issue_name": ConvertableAttr("fields.summary"),
-            "created_at": ConvertableAttr(
-                "fields.created",
-                lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S.%f%z"),
-                lambda x: x.strftime("%Y-%m-%dT%H:%M:%S.%f%z"),
+        "issue_id": ConvertableAttr("id"),
+        "issue_name": ConvertableAttr("fields.summary"),
+        "created_at": ConvertableAttr(
+            "fields.created",
+            lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S.%f%z"),
+            lambda x: x.strftime("%Y-%m-%dT%H:%M:%S.%f%z"),
+        ),
+        "updated_at": ConvertableAttr(
+            "fields.updated",
+            lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S.%f%z"),
+            lambda x: x.strftime("%Y-%m-%dT%H:%M:%S.%f%z"),
+        ),
+        "description": ConvertableAttr(
+            "fields.description",
+            lambda x: "" if x is None else x,
+            lambda x: None if not x else x,
+        ),
+        "labels": ConvertableAttr(
+            "fields.labels",
+            # might be broken if , is used in label name
+            lambda x: (
+                x if isinstance(x, list) else ",".join(x) if isinstance(x, str) else []
             ),
-            "updated_at": ConvertableAttr(
-                "fields.updated",
-                lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S.%f%z"),
-                lambda x: x.strftime("%Y-%m-%dT%H:%M:%S.%f%z"),
-            ),
-            "description": ConvertableAttr(
-                "fields.description",
-                lambda x: "" if x is None else x,
-                lambda x: None if not x else x,
-            ),
-            "labels": ConvertableAttr(
-                "fields.labels",
-                # might be broken if , is used in label name
-                lambda x: (
-                    x
-                    if isinstance(x, list)
-                    else ",".join(x) if isinstance(x, str) else []
-                ),
-                lambda x: x.split(",") if x is not None else [],
-            ),
-        }
+            lambda x: x.split(",") if x is not None else [],
+        ),
+    }
 
     def __init__(self, source: _JiraIssue) -> None:
         super().__init__(source, JiraIssue.ATTRS_MAP)
@@ -270,7 +263,7 @@ class JiraIssue(Issue):
         )
 
         self._source.update(fields=data)
-    
+
     def delete(self) -> None:
         self._source.delete()
 
