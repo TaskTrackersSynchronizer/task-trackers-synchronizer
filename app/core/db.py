@@ -37,6 +37,10 @@ class Database(ABC):
         pass
 
     @abstractmethod
+    def delete(self, table_name: str, query: dict) -> None:
+        pass
+
+    @abstractmethod
     def close(self):
         pass
 
@@ -149,6 +153,29 @@ class DocumentDatabase(Database):
 
         return results
 
+    def delete(self, table_name: str, query: dict) -> None:
+        """
+        Deletes rows in a table that match a query
+        Limitations: only supports exact matches
+                     (check dict elements for equality)
+        :param table: name of the table
+        :param query: dictionary of key-value pairs to match
+        :return: list of dictionaries representing the rows that
+                 match the query (empty if none match)
+        """
+
+        def accum_func(
+            accumulator: list[str], query_row: tuple[str, object]
+        ) -> list[object]:
+            return accumulator + [f"$.{query_row[0]}", query_row[1]]
+
+        q = " AND ".join([" json_extract(data, ?) = ?"] * len(query))
+
+        _ = self._db.execute(
+            f"DELETE * FROM {table_name} WHERE {q}",
+            reduce(accum_func, query.items(), []),
+        )
+
     def close(self):
         """
         Close the database connection
@@ -196,6 +223,9 @@ class MockDatabase(Database):
         raise NotImplementedError()
 
     def find(self, table_name: str, query: dict) -> list[dict]:
+        raise NotImplementedError()
+
+    def delete(self, table_name: str, query: dict) -> list[dict]:
         raise NotImplementedError()
 
     def close(self):

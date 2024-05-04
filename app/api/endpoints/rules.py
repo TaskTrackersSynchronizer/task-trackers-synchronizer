@@ -6,6 +6,8 @@ from app.core.rule import RuleDTO
 from fastapi import Depends
 from app.core.db import get_db
 import app.api.crud as crud
+from typing import Annotated
+from fastapi import Depends, FastAPI
 
 router = APIRouter()
 
@@ -22,6 +24,8 @@ def add_rule(rule: RuleDTO, db: DocumentDatabase = Depends(get_db)):
     return crud.add_rule(rule, db)
 
 
-@router.get("/api/remove_rule")
-def remove_rule(rule: RuleDTO, db: DocumentDatabase = Depends(get_db)):
+@router.delete("/api/remove_rule")
+def remove_rule(
+    rule: Annotated[RuleDTO, Depends()], db: DocumentDatabase = Depends(get_db)
+):
     return crud.remove_rule(rule, db)
