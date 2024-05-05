@@ -23,7 +23,9 @@ def test_syncs_existing():
     gitlab_provider = get_provider("Gitlab")
 
     def get_unsynced_issues(src_issues, dst_issues) -> list[Issue]:
-        related_issues: list[IssuePair] = Issue.filter_related(src_issues, dst_issues)
+        related_issues: list[IssuePair] = Issue.filter_related(
+            src_issues, dst_issues
+        )
 
         unsynced_issues = []
         for rule in rules:
@@ -34,12 +36,16 @@ def test_syncs_existing():
         return unsynced_issues
 
     old_jira_issues: list[JiraIssue] = jira_provider.get_last_updated_issues()
-    old_gitlab_issues: list[GitlabIssue] = gitlab_provider.get_last_updated_issues()
+    old_gitlab_issues: list[
+        GitlabIssue
+    ] = gitlab_provider.get_last_updated_issues()
 
     old_jira_issues_map = {x.issue_name: x for x in old_jira_issues}
     old_gitlab_issues_map = {x.issue_name: x for x in old_gitlab_issues}
 
-    unsynced: list[Issue] = get_unsynced_issues(old_jira_issues, old_gitlab_issues)
+    unsynced: list[Issue] = get_unsynced_issues(
+        old_jira_issues, old_gitlab_issues
+    )
 
     assert len(unsynced) != 0
 
@@ -58,7 +64,9 @@ def test_syncs_existing():
                 issue.delete()
                 continue
 
-            exported = old_issues_map[issue.issue_name].export_values(unconvert=False)
+            exported = old_issues_map[issue.issue_name].export_values(
+                unconvert=False
+            )
             issue.import_values(exported, convert=False)
             issue.update()
 

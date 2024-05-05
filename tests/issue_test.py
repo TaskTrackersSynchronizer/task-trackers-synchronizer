@@ -34,7 +34,9 @@ def test_issue_update(provider):
 
     assert len(issues) != 0, "Issues must not be empty"
 
-    issue_description_map = {issue.issue_id: issue.description for issue in issues}
+    issue_description_map = {
+        issue.issue_id: issue.description for issue in issues
+    }
 
     for issue in issues:
         # TODO: assert on new values
