@@ -9,7 +9,7 @@ import app.api.crud as crud
 from typing import Annotated
 from fastapi import Depends, FastAPI
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
 
 # project id reserved for specific trackers which might

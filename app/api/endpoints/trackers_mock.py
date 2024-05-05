@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from app.core.logger import logger
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
 
 # Retrieve initial data regarding task trackers.

@@ -6,7 +6,7 @@ from app.core.config import config
 
 import typing as t
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
 
 # Retrieve initial data regarding task trackers.
