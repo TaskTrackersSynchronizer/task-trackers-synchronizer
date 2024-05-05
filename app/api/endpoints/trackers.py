@@ -13,6 +13,6 @@ router = APIRouter(prefix="/api")
 # Might include fields or something like List[projectInfo]
 # projectInfo: List[projectField]
 # For the mock on front we can assume that initial data is present
-@router.get("/trackers/")
+@router.get("/trackers")
 def get_trackers(flat: t.Optional[bool] = True):
-    return config.trackers
+    return config.task_trackers
