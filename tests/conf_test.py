@@ -6,8 +6,8 @@ from fastapi.testclient import TestClient
 from app.core.application import create_api
 
 
-@pytest.fixture(scope='module')
-def client() -> Generator:
+@pytest.fixture(scope="module")
+def client() -> Generator[TestClient, None, None]:
     api = create_api()
     with TestClient(api) as c:
         yield c

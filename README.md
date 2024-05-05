@@ -1,42 +1,21 @@
-# fastapi-starter-template
-
-
+# Task trackers synchronizer
+https://github.com/TaskTrackersSynchronizer/task-trackers-synchronizer/blob/dev/README.md
 ##  Description
 
-This is a basic python api setup using the FastAPI framework. It is deployable to the cloud out of the box without much configuration or changes needed (if any at all).
+Task Trackers Synchronizer is a personal application that enables users to synchronize tasks across various task trackers in a flexible manner.
 
-###  Directory Structure
-```
-fastapi-starter-template
-├── app
-│   ├── api
-│   │   ├── endpoints
-│   │   │   ├── __init__.py
-│   │   │   └── hello.py
-│   │   └── __init__.py
-│   ├── core
-│   │   ├── __init__.py
-│   │   └── application.py
-│   ├── __init__.py
-│   └── main.py
-├── tests
-│   ├── endpoints
-│   │   └── hello_test.py
-│   ├── __init__.py
-│   └── conftest.py
-├── Dockerfile
-├── README.md
-├── docker-compose.yaml
-├── poetry.lock
-├── pyproject.toml
-└── tox.ini
-```
 
 ###  Features
 
+-     Conversion to Generic Issues + NoSQL Design: Simplifies the addition of external issue providers by converting tasks into a generic format and utilizing a NoSQL design for flexibility and scalability.
+
+-   Rule-based Synchronization Algorithm: Offers customizable synchronization processes based on user-defined rules. This feature is particularly useful in scenarios where customer and developer organizations operate on different task trackers but require synchronization for specific projects while adhering to internal issue tracking conventions.
+
+### Development features
+
 -  Logging
 
--  Testing & Coverage
+-  Comprehensive Testing & Coverage
 
 -  REST API support
 
@@ -44,38 +23,82 @@ fastapi-starter-template
 
 -  Pre-Commit Code Linting & Formatting
 
+
+## Quality gates evaluation
+
+- Progress on Quality Gates Automation
+
+    - Automated CI jobs organized by various quality gates:
+        - **Code Quality**:
+            - *flake8*: A Python linting tool for enforcing coding standards.
+            - *Black*: Used to automatically format code according to PEP 8 standards.
+            - *Pre-commit Hooks*: Ensures code quality standards are met before committing changes.
+            - *Code Coverage*:
+                - *Unit Tests with pytest*: Utilizes pytest for unit testing, integrating with issue providers APIs and following Test-Driven Development (TDD) methodology.
+                - *Integration Tests with pytest*: Ensures synchronization of all issues and includes idempotent tests with rule synchronization.
+                - *End-to-End (e2e) Tests with docker-compose*: Conducts end-to-end testing in a Dockerized environment.
+            - *Mutation Unit Tests with mutmut*: Evaluates test coverage by performing mutation testing.
+        
+        - **Security**:
+            - *Semgrep with Bandit Ruleset*: Utilizes Semgrep with Bandit ruleset to identify common Python vulnerabilities.
+            - *SonarCloud*: Performs cloud-based security quality gate evaluations.
+            - *Docker Image Scan with Trivy*: Scans Docker images for vulnerabilities.
+            - *ZAPROXY (DAST)*: Conducts Dynamic Application Security Testing (DAST) using ZAPROXY.
+
+        - **Performance**:
+            - *k6*: A tool for load testing and performance monitoring.
+            - *Prometheus*: Used for monitoring and alerting.
+
+- Other Testing Techniques
+
+    - **Mocks**:
+        - *Mock Backend API*: Allows end-to-end testing with frontend without being blocked by frontend-related issues.
+        - *Mock Issue Providers*: Avoids unnecessary API calls by simulating responses.
+        - *Mock Database*: Tests components dependent on the database without accessing the actual database.
+
+
 ##  Getting Started
 
 Getting started developing with this template is pretty simple using docker and docker-compose.
 
 ```shell script
 # Clone the repository
-git clone git@github.com:zdmwi/fastapi-starter-template.git
+git clone git@github.com:TaskTrackersSynchronizer/task-trackers-synchronizer.git
 
 # cd into project root
-cd fastapi-starter-template
+cd task-trackers-synchronizer
 
 # Launch the project
 docker-compose up
 ```
 
-Afterwards, the project will be live at [http://localhost:5000](http://localhost:5000).
+### Development
 
-## Documentation
+For the development purposes, you can run the backend locally as follows:
+```bash
+poetry install . 
+poetry run uvicorn --host 127.0.0.1 --port 3434  app.main:api --reload
+```
 
-FastAPI automatically generates documentation based on the specification of the endpoints you have written. You can find the docs at [http://localhost:5000/docs](http://localhost:5000/docs).
+Afterwards, the project will be live at [http://localhost:3434](http://localhost:3434).
 
-## Testing
+### Testing
 
 In order to test and lint the project locally you need to install the poetry dependencies outlined in the pyproject.toml file.
 
 If you have Poetry installed then it's as easy as running `poetry shell` to activate the virtual environment first and then `poetry install` to get all the dependencies.
 
-This starter template has an example test which covers its only endpoint. To run the test, ensure you are
-in the same directory as the `tox.ini` file and run `tox` from the command line. It will also perform code
-linting and formatting as long as the pre-commit hooks were installed. We'll talk about that next.
 
-# Code Formatting & Linting
 
-To activate pre-commit formatting and linting all you need to do is run `pre-commit install` from the root of your local git repository. Now
-every time you try to make a commit, the code will be formatted and linted for errors first.
+
+
+## Documentation
+
+FastAPI automatically generates documentation based on the specification of the endpoints you have written. You can find the docs at [http://localhost:5000/docs](http://localhost:5000/docs).
+
+
+
+
+
+
+

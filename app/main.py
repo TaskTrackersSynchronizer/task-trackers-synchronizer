@@ -1,3 +1,9 @@
-from .core.application import create_api
+from app.core.application import create_api, create_mock_api
+import os
 
-api = create_api()
+is_mock = os.getenv("MOCK_API", False)
+
+if is_mock:
+    api = create_mock_api()
+else:
+    api = create_api()
