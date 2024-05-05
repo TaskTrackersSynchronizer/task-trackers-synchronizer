@@ -5,7 +5,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.staticfiles import StaticFiles
 
 from app.api.endpoints import fields_mock, rules_mock, trackers_mock
-from app.api.endpoints import fields, rules, trackers
+from app.api.endpoints import fields, rules, trackers, projects
 
 static_resources_path = os.getenv("STATIC_RESOURCES", "/app/static")
 
@@ -17,6 +17,7 @@ def create_api():
     api.include_router(rules.router)
     api.include_router(fields.router)
     api.include_router(trackers.router)
+    api.include_router(projects.router)
 
     api.mount(
         "/",

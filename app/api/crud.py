@@ -2,7 +2,7 @@ import dacite
 
 from app.core.condition import RuleDirection
 from app.core.project import Project
-from app.core.providers import Provider
+from app.core.providers import Provider, get_provider
 from app.core.db import Database
 from app.core.rule import Rule, RuleDTO
 from dataclasses import asdict
