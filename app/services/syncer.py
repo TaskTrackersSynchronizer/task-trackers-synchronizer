@@ -56,9 +56,9 @@ class Syncer:
                 rule.source.tracker.lower() == src_tracker.lower()
                 and rule.destination.tracker.lower() == dst_tracker.lower()
             ):
-                projects_dict[(rule.source.project, rule.destination.project)].append(
-                    rule
-                )
+                projects_dict[
+                    (rule.source.project, rule.destination.project)
+                ].append(rule)
 
         logger.info(projects_dict)
         for projects_pair, rules in projects_dict.items():
@@ -88,7 +88,9 @@ class Syncer:
                 # TODO: fetch local
 
                 # TODO: for each issue keep set of related ids
-                related_issue: Optional[Issue] = self.issues_svc.get_related_issue(
+                related_issue: Optional[
+                    Issue
+                ] = self.issues_svc.get_related_issue(
                     issue, rule.destination.project, projects_pairs.dst_provider
                 )
                 if related_issue is None:
@@ -127,12 +129,16 @@ class Syncer:
             )
 
             for projects_pair in projects_pairs:
-                projects_pair.issues += projects_pair.src_provider.get_project_issues(
-                    projects_pair.src_project, updated_at=self.updated_at
+                projects_pair.issues += (
+                    projects_pair.src_provider.get_project_issues(
+                        projects_pair.src_project, updated_at=self.updated_at
+                    )
                 )
 
-                projects_pair.issues += projects_pair.dst_provider.get_project_issues(
-                    projects_pair.dst_project, updated_at=self.updated_at
+                projects_pair.issues += (
+                    projects_pair.dst_provider.get_project_issues(
+                        projects_pair.dst_project, updated_at=self.updated_at
+                    )
                 )
 
                 self.handle_updated_issues(projects_pair)

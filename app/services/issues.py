@@ -27,8 +27,12 @@ class IssuesService:
     ) -> Optional[Issue]:
         # TODO: fetch from db if possible
         # TODO: change to ids
-        logger.debug(f"fetching related issue: t_project: {target_project_name}")
-        related_issue: Optional[Issue] = target_provider.get_project_issue_by_name(
+        logger.debug(
+            f"fetching related issue: t_project: {target_project_name}"
+        )
+        related_issue: Optional[
+            Issue
+        ] = target_provider.get_project_issue_by_name(
             target_project_name, issue.issue_name
         )
         return related_issue

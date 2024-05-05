@@ -14,18 +14,16 @@ router = APIRouter(prefix="/api")
 
 # project id reserved for specific trackers which might
 # have differnet fields per project
-@router.get("/api/rule_list")
+@router.get("/rule_list")
 def get_rules(db: DocumentDatabase = Depends(get_db)):
     return crud.get_rules(db)
 
 
-@router.post("/api/add_rule")
+@router.post("/add_rule")
 def add_rule(rule: RuleDTO, db: DocumentDatabase = Depends(get_db)):
     return crud.add_rule(rule, db)
 
 
-@router.delete("/api/remove_rule")
-def remove_rule(
-    rule: Annotated[RuleDTO, Depends()], db: DocumentDatabase = Depends(get_db)
-):
+@router.delete("/remove_rule")
+def remove_rule(rule: RuleDTO, db: DocumentDatabase = Depends(get_db)):
     return crud.remove_rule(rule, db)
