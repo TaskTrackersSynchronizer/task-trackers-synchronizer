@@ -15,5 +15,6 @@ jobs:
       - name: Start server and run tests
         run: |
           git submodule update --init --remote 
-          docker-compose up -d 
-          sleep 1 && ./k6 run k6.js
+          docker-compose up --wait api
+          ./k6 run k6.js
+
