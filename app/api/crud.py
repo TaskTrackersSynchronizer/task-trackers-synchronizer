@@ -36,7 +36,7 @@ def add_rule(rule_dto: RuleDTO, db: Database):
     # TODO: return created rule
 
 
-def remove_rule(rule: RuleDTO, db: Database):
+def remove_rule(rule_dto: RuleDTO, db: Database):
     rule = Rule.from_dto(rule_dto)
     db.delete("rules", asdict(rule))
 
