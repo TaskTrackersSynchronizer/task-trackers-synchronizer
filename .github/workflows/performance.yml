@@ -9,12 +9,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install k6
-        run: |
-          curl https://github.com/grafana/k6/releases/download/v0.47.0/k6-v0.47.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
-      - name: Start server and run tests
-        run: |
-          git submodule update --init --remote 
-          docker-compose up --wait api
-          ./k6 run k6.js
-
+      - name: Run k6 local test
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: k6.js
+          # flags: --vus 50 --duration 10s
