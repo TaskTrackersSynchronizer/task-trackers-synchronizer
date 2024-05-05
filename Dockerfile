@@ -31,7 +31,6 @@ ARG INSTALL_DEV=false
 RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install --no-root ; else poetry install --no-root --no-dev ; fi"
 
 COPY ./app /app/app
-COPY .k6.js /k6.js
 
 COPY --from=FRONTEND-BUILDER /build/dist/ /app/static
 COPY --from=FRONTEND-BUILDER /build/public/ /app/static
