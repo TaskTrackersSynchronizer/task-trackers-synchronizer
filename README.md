@@ -28,27 +28,26 @@ Task Trackers Synchronizer is a personal application that enables users to synch
 
 - Progress on Quality Gates Automation
 
-    - Continuous Integration (CI) Jobs:
-        - Automated jobs organized by various quality gates:
-            - **Code Quality**:
-                - *flake8*: A Python linting tool for enforcing coding standards.
-                - *Black*: Used to automatically format code according to PEP 8 standards.
-                - *Pre-commit Hooks*: Ensures code quality standards are met before committing changes.
-                - *Code Coverage*:
-                    - *Unit Tests with pytest*: Utilizes pytest for unit testing, integrating with issue providers APIs and following Test-Driven Development (TDD) methodology.
-                    - *Integration Tests with pytest*: Ensures synchronization of all issues and includes idempotent tests with rule synchronization.
-                    - *End-to-End (e2e) Tests with docker-compose*: Conducts end-to-end testing in a Dockerized environment.
-                - *Mutation Unit Tests with mutmut*: Evaluates test coverage by performing mutation testing.
-            
-            - **Security**:
-                - *Semgrep with Bandit Ruleset*: Utilizes Semgrep with Bandit ruleset to identify common Python vulnerabilities.
-                - *SonarCloud*: Performs cloud-based security quality gate evaluations.
-                - *Docker Image Scan with Trivy*: Scans Docker images for vulnerabilities.
-                - *ZAPROXY (DAST)*: Conducts Dynamic Application Security Testing (DAST) using ZAPROXY.
+    - Automated CI jobs organized by various quality gates:
+        - **Code Quality**:
+            - *flake8*: A Python linting tool for enforcing coding standards.
+            - *Black*: Used to automatically format code according to PEP 8 standards.
+            - *Pre-commit Hooks*: Ensures code quality standards are met before committing changes.
+            - *Code Coverage*:
+                - *Unit Tests with pytest*: Utilizes pytest for unit testing, integrating with issue providers APIs and following Test-Driven Development (TDD) methodology.
+                - *Integration Tests with pytest*: Ensures synchronization of all issues and includes idempotent tests with rule synchronization.
+                - *End-to-End (e2e) Tests with docker-compose*: Conducts end-to-end testing in a Dockerized environment.
+            - *Mutation Unit Tests with mutmut*: Evaluates test coverage by performing mutation testing.
+        
+        - **Security**:
+            - *Semgrep with Bandit Ruleset*: Utilizes Semgrep with Bandit ruleset to identify common Python vulnerabilities.
+            - *SonarCloud*: Performs cloud-based security quality gate evaluations.
+            - *Docker Image Scan with Trivy*: Scans Docker images for vulnerabilities.
+            - *ZAPROXY (DAST)*: Conducts Dynamic Application Security Testing (DAST) using ZAPROXY.
 
-            - **Performance**:
-                - *k6*: A tool for load testing and performance monitoring.
-                - *Prometheus*: Used for monitoring and alerting.
+        - **Performance**:
+            - *k6*: A tool for load testing and performance monitoring.
+            - *Prometheus*: Used for monitoring and alerting.
 
 - Other Testing Techniques
 
