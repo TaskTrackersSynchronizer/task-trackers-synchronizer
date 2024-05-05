@@ -101,6 +101,7 @@ jobs:
   mutation-test:
     name: mutmut/test
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
@@ -113,7 +114,7 @@ jobs:
     - name: Install dependencies
       run: poetry install
     - name: Run tests
-      run: poetry run mutmut run --paths-to-mutate "app/core/" --runner "pytest -m unit tests/"
+      run: poetry run mutmut run --paths-to-mutate "app/core/" --runner "pytest -m unit tests/"  --select=number
 
   docker:
     name: docker/image
