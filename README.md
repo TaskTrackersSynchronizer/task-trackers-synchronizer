@@ -46,6 +46,7 @@ Task Trackers Synchronizer is a personal application that enables users to synch
 
         - **Performance**:
             - *k6*: A tool for load testing and performance monitoring. **Performance Gate** job is used to ensure that the application fulfills performance requirements.
+            - *prometheus*: a GUI tool for performance monitoring.
 
 
 - Other Testing Techniques
