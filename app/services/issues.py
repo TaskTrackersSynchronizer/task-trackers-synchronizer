@@ -23,7 +23,10 @@ class IssuesService:
         return issues
 
     def get_related_issue(
-        self, issue: Issue, target_project_name: str, target_provider: Provider
+        self,
+        issue: Issue,
+        target_project_name: str,
+        target_provider: Provider,
     ) -> Optional[Issue]:
         # TODO: fetch from db if possible
         # TODO: change to ids

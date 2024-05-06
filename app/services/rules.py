@@ -18,5 +18,8 @@ class RulesService:
     def add_rule(self, rule: Rule):
         # TODO: return error upon adding of duplicates
         if rule.source.tracker.lower() > rule.destination.tracker.lower():
-            rule.source, rule.destination = rule.destination, rule.source
+            rule.source, rule.destination = (
+                rule.destination,
+                rule.source,
+            )
         self._db.add_row("rules", asdict(rule))
