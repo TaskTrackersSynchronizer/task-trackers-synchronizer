@@ -167,12 +167,12 @@ class DocumentDatabase(Database):
         def accum_func(
             accumulator: list[str], query_row: tuple[str, object]
         ) -> list[object]:
-            return accumulator + [f"$.{query_row[0]}", query_row[1]]
+            return accumulator + [f"$.{query_row[0]}", str(query_row[1])]
 
         q = " AND ".join([" json_extract(data, ?) = ?"] * len(query))
 
         _ = self._db.execute(
-            f"DELETE * FROM {table_name} WHERE {q}",
+            f"DELETE FROM {table_name} WHERE {q}",
             reduce(accum_func, query.items(), []),
         )
 
