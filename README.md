@@ -4,8 +4,7 @@ https://github.com/TaskTrackersSynchronizer/task-trackers-synchronizer/blob/dev/
 
 Task Trackers Synchronizer is a personal application that enables users to synchronize tasks across various task trackers in a flexible manner.
 
-
-- [Front](https://imgur.com/a/KEaiMhH)
+![Front](https://imgur.com/a/KEaiMhH)
 
 ###  Features
 
