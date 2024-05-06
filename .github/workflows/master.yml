@@ -81,6 +81,23 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+  integration-test:
+    name: pytest/integration-test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    - name: Install poetry
+      uses: abatilo/actions-poetry@v2
+      with:
+        poetry-version: '1.7.1'
+    - name: Install dependencies
+      run: poetry install
+    - name: Run tests
+      run: poetry run pytest -m "not unit" tests/*.py
+
   unit-test:
     name: pytest/unit-test
     runs-on: ubuntu-latest
