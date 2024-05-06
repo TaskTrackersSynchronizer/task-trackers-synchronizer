@@ -2,11 +2,15 @@ from fastapi.testclient import TestClient
 from app.api.endpoints.rules import router
 from fastapi import FastAPI
 from app.core.logger import logger
+from dotenv import load_dotenv
 
 api = FastAPI()
 api.include_router(router)
 
 client = TestClient(api)
+
+load_dotenv()
+
 
 TEST_RULES = [
     {
@@ -87,11 +91,6 @@ def test_get_rules():
     )
 
     for created_rule, test_rule in zip(created_rules, TEST_RULES):
-        assert (
-            created_rule["source"]["tracker"] == test_rule["source"]["tracker"]
-        )
+        assert created_rule["source"]["tracker"] == test_rule["source"]["tracker"]
         assert created_rule["source"]["board"] == test_rule["source"]["board"]
-        assert (
-            created_rule["source"]["field_name"]
-            == test_rule["source"]["field_name"]
-        )
+        assert created_rule["source"]["field_name"] == test_rule["source"]["field_name"]

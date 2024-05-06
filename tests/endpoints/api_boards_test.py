@@ -1,10 +1,13 @@
 from fastapi.testclient import TestClient
 from app.api.endpoints.projects import router
 from fastapi import FastAPI
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 api = FastAPI()
 api.include_router(router)
-
 client = TestClient(api)
 
 
