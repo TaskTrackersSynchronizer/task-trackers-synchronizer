@@ -40,7 +40,7 @@ class Syncer:
         self.updated_at = datetime.fromtimestamp(0)
 
     def start(self, interval_min: int = 10):
-        schedule.every(interval_min).minutes.do(self.sync_all())
+        schedule.every(interval_min).minutes.do(self.sync_all)
 
         while True:
             schedule.run_pending()
@@ -65,8 +65,7 @@ class Syncer:
                 rule.source.tracker.lower() == src_tracker.lower()
                 and rule.destination.tracker.lower() == dst_tracker.lower()
             ):
-                projects_dict[(rule.source.project,
-                               rule.destination.project)].append(
+                projects_dict[(rule.source.project, rule.destination.project)].append(
                     rule
                 )
 
@@ -140,17 +139,15 @@ class Syncer:
             )
 
             for projects_pair in projects_pairs:
-                projects_pair.issues += \
-                    projects_pair.src_provider.get_project_issues(
-                        projects_pair.src_project,
-                        updated_at=self.updated_at,
-                    )
+                projects_pair.issues += projects_pair.src_provider.get_project_issues(
+                    projects_pair.src_project,
+                    updated_at=self.updated_at,
+                )
 
-                projects_pair.issues += \
-                    projects_pair.dst_provider.get_project_issues(
-                        projects_pair.dst_project,
-                        updated_at=self.updated_at,
-                    )
+                projects_pair.issues += projects_pair.dst_provider.get_project_issues(
+                    projects_pair.dst_project,
+                    updated_at=self.updated_at,
+                )
 
                 self.handle_updated_issues(projects_pair)
 
