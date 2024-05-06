@@ -30,21 +30,22 @@ Task Trackers Synchronizer is a personal application that enables users to synch
 
     - Automated CI jobs organized by various quality gates:
         - **Code Quality**:
-            - *flake8*: A Python linting tool for enforcing coding standards.
-            - *Black*: Used to automatically format code according to PEP 8 standards.
-            - *Pre-commit Hooks*: Ensures code quality standards are met before committing changes.
-            - *Code Coverage*:
+            - *Code Coverage* - verified through the **coverage_gate** job. Its passing also presupposes successful passing of code style checks:
                 - *Unit Tests with pytest*: Utilizes pytest for unit testing, integrating with issue providers APIs and following Test-Driven Development (TDD) methodology.
                 - *Integration Tests with pytest*: Ensures synchronization of all issues and includes idempotent tests with rule synchronization.
+            - *Code Style*:
+                - *flake8*: A Python linting tool for enforcing coding standards.
+                - *Black*: Used to automatically format code according to PEP 8 standards.
+                - *Pre-commit Hooks*: Ensures code quality standards are met before committing changes.
         
         - **Security**:
+            - *Docker Image Scan with Trivy*: Scans Docker images for vulnerabilities. Since Trivy image scan is performed at the end, successful passing of it's job supposes completion of all security checks.
             - *Semgrep with Bandit Ruleset*: Utilizes Semgrep with Bandit ruleset to identify common Python vulnerabilities.
             - *SonarCloud*: Performs cloud-based security quality gate evaluations.
-            - *Docker Image Scan with Trivy*: Scans Docker images for vulnerabilities.
-            - *ZAPROXY (DAST)*: Conducts Dynamic Application Security Testing (DAST) using ZAPROXY.
 
         - **Performance**:
-            - *k6*: A tool for load testing and performance monitoring. 
+            - *k6*: A tool for load testing and performance monitoring. **Performance Gate** job is used to ensure that the application fulfills performance requirements.
+
 
 - Other Testing Techniques
 
@@ -57,7 +58,12 @@ Task Trackers Synchronizer is a personal application that enables users to synch
     - *Mutation Unit Tests with mutmut*: Evaluates test coverage by performing mutation testing.
     - *Exploratory Testing*
 
-    - *Performance observability*: Prometheus is Used for monitoring and alerting. 
+    - *Performance observability*: Prometheus is used for monitoring and alerting. 
+
+    - *Dynamic Application Security Testing* (DAST):  *ZAPROXY*: Conducts Dynamic Application Security Testing (DAST) using ZAPROXY.
+
+
+
 ##  Getting Started
 
 Getting started developing with this template is pretty simple using docker and docker-compose.
