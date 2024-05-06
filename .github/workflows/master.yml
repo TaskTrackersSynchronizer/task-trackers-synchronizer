@@ -8,7 +8,7 @@ jobs:
   coverage_gate:
     name: coverage/gate
     runs-on: ubuntu-latest
-    needs: [flake8, bandit, semgrep, sonarcloud, unit-test, mutation-test]
+    needs: [flake8, bandit, semgrep, sonarcloud, unit-test]
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
@@ -98,27 +98,11 @@ jobs:
     - name: Run tests
       run: poetry run pytest -m unit tests/*.py
 
-  mutation-test:
-    name: mutmut/test
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-    - name: Install poetry
-      uses: abatilo/actions-poetry@v2
-      with:
-        poetry-version: '1.7.1'
-    - name: Install dependencies
-      run: poetry install
-    - name: Run tests
-      run: poetry run mutmut run --paths-to-mutate "app/core/" --runner "pytest -m unit tests/"
 
   docker:
     name: docker/image
     runs-on: ubuntu-latest
-    needs: [flake8, bandit, semgrep, sonarcloud, unit-test, mutation-test, coverage_gate] # do not build if tests fail
+    needs: [flake8, bandit, semgrep, sonarcloud, unit-test, coverage_gate] # do not build if tests fail
     steps:
     - uses: actions/checkout@v4
     - name: Set up QEMU

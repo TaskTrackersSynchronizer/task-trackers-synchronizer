@@ -81,7 +81,11 @@ class Issue:
 
         for key in attrs_map:
             c_attr = self._attrs_map[key]
-            setattr(self, key, c_attr.convert(c_attr.resolve_value(self._source)))
+            setattr(
+                self,
+                key,
+                c_attr.convert(c_attr.resolve_value(self._source)),
+            )
 
     def asdict(self) -> dict[str, str]:
         return {
@@ -197,7 +201,11 @@ class GitlabIssue(Issue):
             "labels",
             # might be broken if , is used in label name
             lambda x: (
-                x if isinstance(x, list) else ",".join(x) if isinstance(x, str) else []
+                x
+                if isinstance(x, list)
+                else ",".join(x)
+                if isinstance(x, str)
+                else []
             ),
             lambda x: x.split(",") if x is not None else [],
         ),
@@ -244,7 +252,11 @@ class JiraIssue(Issue):
             "fields.labels",
             # might be broken if , is used in label name
             lambda x: (
-                x if isinstance(x, list) else ",".join(x) if isinstance(x, str) else []
+                x
+                if isinstance(x, list)
+                else ",".join(x)
+                if isinstance(x, str)
+                else []
             ),
             lambda x: x.split(",") if x is not None else [],
         ),

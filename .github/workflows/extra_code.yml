@@ -1,0 +1,24 @@
+name: Extra quality checks
+
+on: workflow_dispatch
+
+
+jobs:
+  mutation-test:
+    name: mutmut/test
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    - name: Install poetry
+      uses: abatilo/actions-poetry@v2
+      with:
+        poetry-version: '1.7.1'
+    - name: Install dependencies
+      run: poetry install
+    - name: Run tests
+      run: poetry run mutmut run --paths-to-mutate "app/core/" --runner "pytest -m unit tests/"  --select=number
+

@@ -10,6 +10,8 @@ from dataclasses import dataclass, field
 from typing import Optional
 from app.core.logger import logger
 from collections import defaultdict
+import schedule
+import time
 
 
 @dataclass
@@ -36,6 +38,13 @@ class Syncer:
 
         # assme that issues are never synced at the beginning
         self.updated_at = datetime.fromtimestamp(0)
+
+    def start(self, interval_min: int = 10):
+        schedule.every(interval_min).minutes.do(self.sync_all())
+
+        while True:
+            schedule.run_pending()
+            time.sleep(5)
 
     # TODO: cache
     def get_project_name_pairs_from_rules(
@@ -89,7 +98,9 @@ class Syncer:
 
                 # TODO: for each issue keep set of related ids
                 related_issue: Optional[Issue] = self.issues_svc.get_related_issue(
-                    issue, rule.destination.project, projects_pairs.dst_provider
+                    issue,
+                    rule.destination.project,
+                    projects_pairs.dst_provider,
                 )
                 if related_issue is None:
                     related_issue = projects_pairs.dst_provider.create_issue(
@@ -128,11 +139,13 @@ class Syncer:
 
             for projects_pair in projects_pairs:
                 projects_pair.issues += projects_pair.src_provider.get_project_issues(
-                    projects_pair.src_project, updated_at=self.updated_at
+                    projects_pair.src_project,
+                    updated_at=self.updated_at,
                 )
 
                 projects_pair.issues += projects_pair.dst_provider.get_project_issues(
-                    projects_pair.dst_project, updated_at=self.updated_at
+                    projects_pair.dst_project,
+                    updated_at=self.updated_at,
                 )
 
                 self.handle_updated_issues(projects_pair)

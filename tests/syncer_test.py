@@ -23,7 +23,9 @@ def test_syncs_existing():
     gitlab_provider = get_provider("Gitlab")
 
     def get_unsynced_issues(src_issues, dst_issues) -> list[Issue]:
-        related_issues: list[IssuePair] = Issue.filter_related(src_issues, dst_issues)
+        related_issues: list[IssuePair] = Issue.filter_related(
+            src_issues, dst_issues
+        )
 
         unsynced_issues = []
         for rule in rules:
@@ -33,34 +35,72 @@ def test_syncs_existing():
                     unsynced_issues.append(issue_pair.dst)
         return unsynced_issues
 
-    old_jira_issues: list[JiraIssue] = jira_provider.get_last_updated_issues()
-    old_gitlab_issues: list[GitlabIssue] = gitlab_provider.get_last_updated_issues()
+    old_jira_issues: list[
+        JiraIssue
+    ] = jira_provider.get_last_updated_issues()
+    old_gitlab_issues: list[
+        GitlabIssue
+    ] = gitlab_provider.get_last_updated_issues()
 
     old_jira_issues_map = {x.issue_name: x for x in old_jira_issues}
     old_gitlab_issues_map = {x.issue_name: x for x in old_gitlab_issues}
 
-    unsynced: list[Issue] = get_unsynced_issues(old_jira_issues, old_gitlab_issues)
+    unsynced: list[Issue] = get_unsynced_issues(
+        old_jira_issues, old_gitlab_issues
+    )
 
     assert len(unsynced) != 0
 
     syncer.sync_all()
 
     jira_issues: list[JiraIssue] = jira_provider.get_last_updated_issues()
-    gitlab_issues: list[GitlabIssue] = gitlab_provider.get_last_updated_issues()
+    gitlab_issues: list[
+        GitlabIssue
+    ] = gitlab_provider.get_last_updated_issues()
 
     unsynced: list[Issue] = get_unsynced_issues(jira_issues, gitlab_issues)
 
     assert len(unsynced) == 0
 
-    def recover_issues(issues: list[Issue], old_issues_map: dict[str, Issue]):
+    def recover_issues(
+        issues: list[Issue], old_issues_map: dict[str, Issue]
+    ):
         for issue in issues:
             if issue.issue_name not in old_issues_map:
                 issue.delete()
                 continue
 
-            exported = old_issues_map[issue.issue_name].export_values(unconvert=False)
+            exported = old_issues_map[issue.issue_name].export_values(
+                unconvert=False
+            )
             issue.import_values(exported, convert=False)
             issue.update()
 
     recover_issues(jira_issues, old_jira_issues_map)
     recover_issues(gitlab_issues, old_gitlab_issues_map)
+
+
+def test_creates_new():
+    db = MockDatabase()
+    syncer: Syncer = Syncer(db)
+
+    jira_provider = get_provider("Jira")
+    gitlab_provider = get_provider("Gitlab")
+
+    new_gl_issue = gitlab_provider.create_issue(
+        "KAN", "syncer_test_creates_new"
+    )
+
+    assert new_gl_issue is not None
+
+    syncer.sync_all()
+
+    new_jira_issue = jira_provider.get_project_issue_by_name(
+        "KAN", "syncer_test_creates_new"
+    )
+
+    assert new_jira_issue is not None
+    assert new_jira_issue.issue_name == "syncer_test_creates_new"
+
+    new_gl_issue.delete()
+    new_jira_issue.delete()

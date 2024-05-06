@@ -18,7 +18,7 @@ export const options = {
 };
 
 export default function () {
-  const result = http.get('https://task-trackers-synchronizer.onrender.com');
+  const result = http.get('https://task-trackers-synchronizer-58id.onrender.com/');
   check(result, {
     'http response status code is 200': result.status === 200,
   });

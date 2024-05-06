@@ -1,6 +1,8 @@
 import dacite
 
 from app.core.condition import RuleDirection
+from app.core.project import Project
+from app.core.providers import Provider, get_provider
 from app.core.db import Database
 from app.core.rule import Rule, RuleDTO
 from dataclasses import asdict
@@ -34,5 +36,12 @@ def add_rule(rule_dto: RuleDTO, db: Database):
     # TODO: return created rule
 
 
-def remove_rule(rule: RuleDTO, db: Database):
-    pass
+def remove_rule(rule_dto: RuleDTO, db: Database):
+    rule = Rule.from_dto(rule_dto)
+    db.delete("rules", asdict(rule))
+
+
+def get_projects(tracker: str) -> list[str]:
+    provider: Provider = get_provider(tracker)
+    projects: list[Project] = provider.get_projects()
+    return [x.name for x in projects]

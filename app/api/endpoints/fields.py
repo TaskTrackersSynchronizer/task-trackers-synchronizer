@@ -5,7 +5,7 @@ from app.core.providers import Provider, get_provider
 
 import typing as t
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
 
 # project id reserved for specific trackers which might

@@ -1,0 +1,19 @@
+name: Performance gate
+
+on: workflow_dispatch
+
+jobs:
+  k6:
+    name: k6/load
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install k6
+        run: |
+          curl https://github.com/grafana/k6/releases/download/v0.47.0/k6-v0.47.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
+      - name: Run load tests
+        run: |
+            ./k6 run --duration 30s --vus 10 k6.js
+
+
