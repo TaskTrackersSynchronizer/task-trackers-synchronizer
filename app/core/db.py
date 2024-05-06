@@ -58,7 +58,7 @@ class DocumentDatabase(Database):
         "rules": "rules",
     } | {x: x for x in PROVIDER_NAMES}
 
-    def __init__(self, f: str):
+    def __init__(self, f: str = "db"):
         """
         Create a new database connection
         :param f: path to the database file
