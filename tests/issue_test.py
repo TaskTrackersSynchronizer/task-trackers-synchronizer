@@ -3,8 +3,11 @@ from app.core.providers import get_provider, JiraProvider
 from app.core.issues import DEFAULT_ATTRS_MAP, GitlabIssue, JiraIssue
 import pytest
 from datetime import datetime
+from dotenv import load_dotenv
 
 BOARD_NAME = "KAN"
+
+load_dotenv()
 
 
 @pytest.mark.integration
@@ -34,9 +37,7 @@ def test_issue_update(provider):
 
     assert len(issues) != 0, "Issues must not be empty"
 
-    issue_description_map = {
-        issue.issue_id: issue.description for issue in issues
-    }
+    issue_description_map = {issue.issue_id: issue.description for issue in issues}
 
     for issue in issues:
         # TODO: assert on new values

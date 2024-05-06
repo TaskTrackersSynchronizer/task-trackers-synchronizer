@@ -11,14 +11,12 @@ from app.core.issues import (
     Issue,
     JiraIssue,
     GitlabIssue,
-    DEFAULT_EXCLUDE_FIELDS,
 )
 
 import typing as t
 import re
 import os
 from typing import Optional
-from copy import deepcopy
 
 load_dotenv()
 
@@ -82,7 +80,7 @@ class GitlabProvider(Provider):
     def get_projects(self) -> list[Project]:
         user_projects = self._user.projects.list(pagination=False)
         return [
-            Project(name=x.name, project_id=x.id, provider="Gitlab")
+            Project(name=x.name, project_id=x.id, tracker="Gitlab")
             for x in user_projects
         ]
 

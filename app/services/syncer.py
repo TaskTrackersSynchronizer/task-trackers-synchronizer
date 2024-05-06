@@ -42,9 +42,13 @@ class Syncer:
         self, rules: list[Rule], src_tracker: str, dst_tracker: str
     ) -> list[ProjectNamePair]:
         relevant_projects: list[ProjectNamePair] = []
-        projects_dict: dict[tuple[str, str], list[Rule]] = defaultdict(list)
+        projects_dict: dict[
+            tuple[str, str], list[Rule]
+        ] = defaultdict(list)
 
-        logger.debug(f"get_project_name_pairs_from_rules rules: {rules}")
+        logger.debug(
+            f"get_project_name_pairs_from_rules rules: {rules}"
+        )
         logger.debug(
             f"""get_project_name_pairs_from_rules\
             src_tracker: {src_tracker},\
@@ -54,7 +58,8 @@ class Syncer:
         for rule in rules:
             if (
                 rule.source.tracker.lower() == src_tracker.lower()
-                and rule.destination.tracker.lower() == dst_tracker.lower()
+                and rule.destination.tracker.lower()
+                == dst_tracker.lower()
             ):
                 projects_dict[
                     (rule.source.project, rule.destination.project)
@@ -91,12 +96,16 @@ class Syncer:
                 related_issue: Optional[
                     Issue
                 ] = self.issues_svc.get_related_issue(
-                    issue, rule.destination.project, projects_pairs.dst_provider
+                    issue,
+                    rule.destination.project,
+                    projects_pairs.dst_provider,
                 )
                 if related_issue is None:
-                    related_issue = projects_pairs.dst_provider.create_issue(
-                        rule.destination.project,
-                        issue.issue_name,
+                    related_issue = (
+                        projects_pairs.dst_provider.create_issue(
+                            rule.destination.project,
+                            issue.issue_name,
+                        )
                     )
 
                     related_issue.import_values(
@@ -131,13 +140,15 @@ class Syncer:
             for projects_pair in projects_pairs:
                 projects_pair.issues += (
                     projects_pair.src_provider.get_project_issues(
-                        projects_pair.src_project, updated_at=self.updated_at
+                        projects_pair.src_project,
+                        updated_at=self.updated_at,
                     )
                 )
 
                 projects_pair.issues += (
                     projects_pair.dst_provider.get_project_issues(
-                        projects_pair.dst_project, updated_at=self.updated_at
+                        projects_pair.dst_project,
+                        updated_at=self.updated_at,
                     )
                 )
 
