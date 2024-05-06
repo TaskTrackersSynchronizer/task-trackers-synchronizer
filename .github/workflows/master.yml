@@ -8,7 +8,7 @@ jobs:
   coverage_gate:
     name: coverage/gate
     runs-on: ubuntu-latest
-    needs: [flake8, bandit, semgrep, sonarcloud, unit-test]
+    needs: [flake8, bandit, semgrep, sonarcloud, unit-test, integration-test]
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
