@@ -10,7 +10,9 @@ def init_document_db() -> DocumentDatabase:
 
 
 @pytest.mark.unit
-def test_document_db_add_single_row(init_document_db: DocumentDatabase):
+def test_document_db_add_single_row(
+    init_document_db: DocumentDatabase,
+):
     """
     Test adding a single row to the database
     """
@@ -18,8 +20,12 @@ def test_document_db_add_single_row(init_document_db: DocumentDatabase):
     issue = MockDatabase.prepare_mock_issues()[0]
     db.add_row("issues", issue)
     db_stored_issues = db.get_all("issues")
-    assert len(db_stored_issues) == 1, "Unexpected number of rows in the table"
-    assert db_stored_issues[0] == issue, "DB and original issues do not match"
+    assert (
+        len(db_stored_issues) == 1
+    ), "Unexpected number of rows in the table"
+    assert (
+        db_stored_issues[0] == issue
+    ), "DB and original issues do not match"
 
 
 @pytest.mark.unit
@@ -38,7 +44,8 @@ def test_document_db_add_multiple_rows_rowwise(
         issues
     ), "Unexpected number of rows in the table"
     assert (
-        db_issue == issue for db_issue, issue in zip(db_stored_issues, issues)
+        db_issue == issue
+        for db_issue, issue in zip(db_stored_issues, issues)
     ), "DB and original issues do not match"
 
 
@@ -55,7 +62,8 @@ def test_document_db_add_all_rows(init_document_db: DocumentDatabase):
         issues
     ), "Unexpected number of rows in the table"
     assert (
-        db_issue == issue for db_issue, issue in zip(db_stored_issues, issues)
+        db_issue == issue
+        for db_issue, issue in zip(db_stored_issues, issues)
     ), "DB and original issues do not match"
 
 

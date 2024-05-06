@@ -82,7 +82,9 @@ class Issue:
         for key in attrs_map:
             c_attr = self._attrs_map[key]
             setattr(
-                self, key, c_attr.convert(c_attr.resolve_value(self._source))
+                self,
+                key,
+                c_attr.convert(c_attr.resolve_value(self._source)),
             )
 
     def asdict(self) -> dict[str, str]:
