@@ -28,6 +28,7 @@ Task Trackers Synchronizer is a personal application that enables users to synch
 
 - Progress on Quality Gates Automation
 
+<<<<<<< Updated upstream
     - Continuous Integration (CI) Jobs:
         - Automated jobs organized by various quality gates:
             - **Code Quality**:
@@ -49,6 +50,25 @@ Task Trackers Synchronizer is a personal application that enables users to synch
             - **Performance**:
                 - *k6*: A tool for load testing and performance monitoring.
                 - *Prometheus*: Used for monitoring and alerting.
+=======
+    - Automated CI jobs organized by various quality gates:
+        - **Code Quality**:
+            - *Code Coverage* - verified through the `coverage_gate` job. Its passing also presupposes successful passing of code style checks:
+                - *Unit Tests with pytest*: Utilizes pytest for unit testing, integrating with issue providers APIs and following Test-Driven Development (TDD) methodology.
+                - *Integration Tests with pytest*: Ensures synchronization of all issues and includes idempotent tests with rule synchronization.
+            - *Code Style*:
+                - *flake8*: A Python linting tool for enforcing coding standards.
+                - *Black*: Used to automatically format code according to PEP 8 standards.
+                - *Pre-commit Hooks*: Ensures code quality standards are met before committing changes.
+        
+        - **Security**:
+            - *Docker Image Scan with Trivy*: Scans Docker images for vulnerabilities. Since Trivy image scan is performed at the end, its successful passing supposes completion of all security checks.
+            - *Semgrep with Bandit Ruleset*: Utilizes Semgrep with Bandit ruleset to identify common Python vulnerabilities.
+            - *SonarCloud*: Performs cloud-based security quality gate evaluations.
+
+        - **Performance**:
+            - *k6*: A tool for load testing and performance monitoring. **Performance Gate** job is used to ensure that the application fulfills performance requirements.
+>>>>>>> Stashed changes
 
 - Other Testing Techniques
 
@@ -58,6 +78,14 @@ Task Trackers Synchronizer is a personal application that enables users to synch
         - *Mock Database*: Tests components dependent on the database without accessing the actual database.
 
 
+<<<<<<< Updated upstream
+=======
+    - *Performance observability*: Prometheus is used for monitoring and alerting. 
+
+    - *Dynamic Application Security Testing* (DAST):  *ZAPROXY*: Conducts Dynamic Application Security Testing (DAST) using ZAPROXY.
+
+
+>>>>>>> Stashed changes
 ##  Getting Started
 
 Getting started developing with this template is pretty simple using docker and docker-compose.
