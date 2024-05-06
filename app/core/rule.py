@@ -1,4 +1,8 @@
-from app.core.condition import Condition, RuleDirection, DefaultCondition
+from app.core.condition import (
+    Condition,
+    RuleDirection,
+    DefaultCondition,
+)
 from app.core.issues import Issue
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -96,8 +100,13 @@ class Rule:
             dst_issue, self.destination.field
         )
 
-    def sync(self, src_issue: Issue, dst_issue: Issue) -> tuple[Issue, Issue]:
-        if not self.condition or self.condition.condition_type == "default":
+    def sync(
+        self, src_issue: Issue, dst_issue: Issue
+    ) -> tuple[Issue, Issue]:
+        if (
+            not self.condition
+            or self.condition.condition_type == "default"
+        ):
             newer: Issue
             older: Issue
 

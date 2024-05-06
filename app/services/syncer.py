@@ -42,13 +42,11 @@ class Syncer:
         self, rules: list[Rule], src_tracker: str, dst_tracker: str
     ) -> list[ProjectNamePair]:
         relevant_projects: list[ProjectNamePair] = []
-        projects_dict: dict[
-            tuple[str, str], list[Rule]
-        ] = defaultdict(list)
-
-        logger.debug(
-            f"get_project_name_pairs_from_rules rules: {rules}"
+        projects_dict: dict[tuple[str, str], list[Rule]] = defaultdict(
+            list
         )
+
+        logger.debug(f"get_project_name_pairs_from_rules rules: {rules}")
         logger.debug(
             f"""get_project_name_pairs_from_rules\
             src_tracker: {src_tracker},\
@@ -58,8 +56,7 @@ class Syncer:
         for rule in rules:
             if (
                 rule.source.tracker.lower() == src_tracker.lower()
-                and rule.destination.tracker.lower()
-                == dst_tracker.lower()
+                and rule.destination.tracker.lower() == dst_tracker.lower()
             ):
                 projects_dict[
                     (rule.source.project, rule.destination.project)
