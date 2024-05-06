@@ -36,8 +36,6 @@ Task Trackers Synchronizer is a personal application that enables users to synch
             - *Code Coverage*:
                 - *Unit Tests with pytest*: Utilizes pytest for unit testing, integrating with issue providers APIs and following Test-Driven Development (TDD) methodology.
                 - *Integration Tests with pytest*: Ensures synchronization of all issues and includes idempotent tests with rule synchronization.
-                - *End-to-End (e2e) Tests with docker-compose*: Conducts end-to-end testing in a Dockerized environment.
-            - *Mutation Unit Tests with mutmut*: Evaluates test coverage by performing mutation testing.
         
         - **Security**:
             - *Semgrep with Bandit Ruleset*: Utilizes Semgrep with Bandit ruleset to identify common Python vulnerabilities.
@@ -46,8 +44,7 @@ Task Trackers Synchronizer is a personal application that enables users to synch
             - *ZAPROXY (DAST)*: Conducts Dynamic Application Security Testing (DAST) using ZAPROXY.
 
         - **Performance**:
-            - *k6*: A tool for load testing and performance monitoring.
-            - *Prometheus*: Used for monitoring and alerting.
+            - *k6*: A tool for load testing and performance monitoring. 
 
 - Other Testing Techniques
 
@@ -56,7 +53,11 @@ Task Trackers Synchronizer is a personal application that enables users to synch
         - *Mock Issue Providers*: Avoids unnecessary API calls by simulating responses.
         - *Mock Database*: Tests components dependent on the database without accessing the actual database.
 
+    <!-- - *End-to-End (e2e) Tests with docker-compose*: Conducts end-to-end testing in a Dockerized environment. -->
+    - *Mutation Unit Tests with mutmut*: Evaluates test coverage by performing mutation testing.
+    - *Exploratory Testing*
 
+    - *Performance observability*: Prometheus is Used for monitoring and alerting. 
 ##  Getting Started
 
 Getting started developing with this template is pretty simple using docker and docker-compose.
