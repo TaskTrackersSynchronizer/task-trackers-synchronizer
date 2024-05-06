@@ -30,7 +30,7 @@ def create_api():
 
     tasks = BackgroundTasks()
     syncer: Syncer = Syncer(get_db())
-    tasks.add_task(syncer.start())
+    tasks.add_task(syncer.start)
     return api
 
 
