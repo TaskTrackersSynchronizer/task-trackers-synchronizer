@@ -100,14 +100,22 @@ If you have Poetry installed then it's as easy as running `poetry shell` to acti
 
 
 
-
 ## Documentation
 
 FastAPI automatically generates documentation based on the specification of the endpoints you have written. You can find the docs at [http://localhost:5000/docs](http://localhost:5000/docs).
 
 
+The following environmental variables can be used to configure the 
+servers for configuring the connectivity to task trackers and database
+```
+JIRA_API_TOKEN=<your_jira_token>
+JIRA_SERVER=https://<your_username>.atlassian.net
+JIRA_EMAIL=your_username@mail.tld
 
+GITLAB_SERVER=https://gitlab.com
+GITLAB_API_TOKEN=<your_gitlab_token>
 
-
+DATABASE_URL=/sqlite.db
+```
 
 
