@@ -91,6 +91,14 @@ def test_get_rules():
     )
 
     for created_rule, test_rule in zip(created_rules, TEST_RULES):
-        assert created_rule["source"]["tracker"] == test_rule["source"]["tracker"]
-        assert created_rule["source"]["board"] == test_rule["source"]["board"]
-        assert created_rule["source"]["field_name"] == test_rule["source"]["field_name"]
+        assert (
+            created_rule["source"]["tracker"]
+            == test_rule["source"]["tracker"]
+        )
+        assert (
+            created_rule["source"]["board"] == test_rule["source"]["board"]
+        )
+        assert (
+            created_rule["source"]["field_name"]
+            == test_rule["source"]["field_name"]
+        )

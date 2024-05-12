@@ -6,6 +6,9 @@ from starlette.staticfiles import StaticFiles
 
 from app.api.endpoints import fields_mock, rules_mock, trackers_mock
 from app.api.endpoints import fields, rules, trackers, projects
+from fastapi import BackgroundTasks
+from app.core.db import get_db
+from app.services.syncer import Syncer
 
 static_resources_path = os.getenv("STATIC_RESOURCES", "/app/static")
 
@@ -25,6 +28,9 @@ def create_api():
         name="static",
     )
 
+    tasks = BackgroundTasks()
+    syncer: Syncer = Syncer(get_db())
+    tasks.add_task(syncer.start)
     return api
 
 

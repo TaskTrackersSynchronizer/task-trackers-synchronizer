@@ -21,7 +21,9 @@ from typing import Optional
 load_dotenv()
 
 # mock default creds are used. TODO: parametrize
-JIRA_SERVER = os.environ.get("JIRA_SERVER", "https://0xf1o2732.atlassian.net")
+JIRA_SERVER = os.environ.get(
+    "JIRA_SERVER", "https://0xf1o2732.atlassian.net"
+)
 JIRA_EMAIL = os.environ.get("JIRA_EMAIL", "0xf1o2732@proton.me")
 GITLAB_SERVER = os.environ.get("GITLAB_SERVER", "https://gitlab.com")
 
@@ -59,7 +61,9 @@ class GitlabProvider(Provider):
     def __init__(self) -> None:
         GITLAB_API_TOKEN = os.environ.get("GITLAB_API_TOKEN", "")
         assert GITLAB_API_TOKEN, "GITLAB_API_TOKEN is not set"
-        self._client = Gitlab(url=GITLAB_SERVER, oauth_token=GITLAB_API_TOKEN)
+        self._client = Gitlab(
+            url=GITLAB_SERVER, oauth_token=GITLAB_API_TOKEN
+        )
         self._client.auth()
 
         self._user_id = self._client.user.id
@@ -145,7 +149,9 @@ class GitlabProvider(Provider):
         else:
             return None
 
-    def create_issue(self, project_name: str, issue_name: str) -> GitlabIssue:
+    def create_issue(
+        self, project_name: str, issue_name: str
+    ) -> GitlabIssue:
         project = self._get_project(project_name)
 
         values = {}
@@ -160,7 +166,8 @@ class JiraProvider(Provider):
         JIRA_API_TOKEN = os.environ.get("JIRA_API_TOKEN", "")
         assert JIRA_API_TOKEN, "JIRA_API_TOKEN is not set"
         self._client = JIRA(
-            server=JIRA_SERVER, basic_auth=(JIRA_EMAIL, JIRA_API_TOKEN)
+            server=JIRA_SERVER,
+            basic_auth=(JIRA_EMAIL, JIRA_API_TOKEN),
         )
 
     def get_projects(self) -> list[Project]:
