@@ -10,7 +10,6 @@ from dataclasses import dataclass, field
 from typing import Optional
 from app.core.logger import logger
 from collections import defaultdict
-import schedule
 import time
 
 
@@ -40,11 +39,9 @@ class Syncer:
         self.updated_at = datetime.fromtimestamp(0)
 
     def start(self, interval_min: int = 1):
-        schedule.every(interval_min).minutes.do(self.sync_all)
-
         while True:
-            schedule.run_pending()
-            time.sleep(5)
+            self.sync_all()
+            time.sleep(interval_min * 60)
 
     # TODO: cache
     def get_project_name_pairs_from_rules(
