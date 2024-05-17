@@ -1,6 +1,8 @@
 version: '3.8'
 services:
     api:
+        env_file:
+          - .env
         restart: always
         hostname: api
         build: .
@@ -9,6 +11,7 @@ services:
         volumes:
             - "./app:/app/app"
         command: /start-reload.sh
+    #
     # prometheus:
     #     image: prom/prometheus
     #     ports:
