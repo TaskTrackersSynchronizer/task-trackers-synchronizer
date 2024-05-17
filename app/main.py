@@ -1,6 +1,6 @@
 from app.core.application import create_api, create_mock_api
 import logging
-from fastapi import FastAPI, Request, status
+from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 import os
@@ -14,9 +14,7 @@ else:
 
 
 @api.exception_handler(RequestValidationError)
-async def validation_exception_handler(
-    request: Request, exc: RequestValidationError
-):
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
     exc_str = f"{exc}".replace("\n", " ").replace("   ", " ")
     logging.error(f"{request}: {exc_str}")
     content = {"status_code": 10422, "message": exc_str, "data": None}
