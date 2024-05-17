@@ -23,7 +23,9 @@ def add_rule(
     db: DocumentDatabase = Depends(get_db),
 ):
     dto = RuleDTO(
-        source=source, direction=RuleDirection(direction), destination=destination
+        source=source,
+        direction=RuleDirection(direction),
+        destination=destination,
     )
     exit(-1)
     return crud.add_rule(dto, db)

@@ -45,7 +45,12 @@ DEFAULT_ATTRS_MAP = {
 }
 
 
-DEFAULT_EXCLUDE_FIELDS = ["issue_id", "created_at", "updated_at", "issue_name"]
+DEFAULT_EXCLUDE_FIELDS = [
+    "issue_id",
+    "created_at",
+    "updated_at",
+    "issue_name",
+]
 
 
 @dataclass
@@ -138,7 +143,9 @@ class Issue:
 
     @classmethod
     def export_fields(cls):
-        return [x for x in cls.ATTRS_MAP if x not in DEFAULT_EXCLUDE_FIELDS]
+        return [
+            x for x in cls.ATTRS_MAP if x not in DEFAULT_EXCLUDE_FIELDS
+        ]
 
     def import_values(
         self,
@@ -205,7 +212,11 @@ class GitlabIssue(Issue):
             "labels",
             # might be broken if , is used in label name
             lambda x: (
-                x if isinstance(x, list) else ",".join(x) if isinstance(x, str) else []
+                x
+                if isinstance(x, list)
+                else ",".join(x)
+                if isinstance(x, str)
+                else []
             ),
             lambda x: x.split(",") if x is not None else [],
         ),
@@ -252,7 +263,11 @@ class JiraIssue(Issue):
             "fields.labels",
             # might be broken if , is used in label name
             lambda x: (
-                x if isinstance(x, list) else ",".join(x) if isinstance(x, str) else []
+                x
+                if isinstance(x, list)
+                else ",".join(x)
+                if isinstance(x, str)
+                else []
             ),
             lambda x: x.split(",") if x is not None else [],
         ),
