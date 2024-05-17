@@ -1,6 +1,6 @@
 from app.core.application import create_api, create_mock_api
 import logging
-from fastapi import FastAPI, Request, status
+from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 import os
