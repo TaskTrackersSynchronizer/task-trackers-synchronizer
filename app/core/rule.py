@@ -18,9 +18,9 @@ class SyncError(RuntimeError):
 class FieldFilter:
     tracker: str
     board: str
-    field_name: str
-    field_val: str
-    comp_op: str
+    fieldName: str
+    fieldVal: str
+    compOp: str
 
 
 @dataclass
@@ -29,25 +29,25 @@ class RuleDTO:
     destination: FieldFilter
     direction: RuleDirection
 
-    # TODO: handle comp_op for conditions
+    # TODO: handle compOp for conditions
     @classmethod
     def from_rule(cls, rule: "Rule") -> "RuleDTO":
         dto = cls(
             source=FieldFilter(
                 tracker=rule.source.tracker,
                 board=rule.source.project,
-                field_name=rule.source.field,
+                fieldName=rule.source.field,
                 # Used for conditional rules, not supported
-                comp_op="",
-                field_val="",
+                compOp="",
+                fieldVal="",
             ),
             destination=FieldFilter(
                 tracker=rule.destination.tracker,
                 board=rule.destination.project,
-                field_name=rule.destination.field,
+                fieldName=rule.destination.field,
                 # Used for conditional rules, not supported
-                comp_op="",
-                field_val="",
+                compOp="",
+                fieldVal="",
             ),
             # Used for conditional rules, not supported
             direction=RuleDirection.ANY,
@@ -75,12 +75,12 @@ class Rule:
             source=RuleSide(
                 tracker=dto.source.tracker,
                 project=dto.source.board,
-                field=dto.source.field_name,
+                field=dto.source.fieldName,
             ),
             destination=RuleSide(
                 tracker=dto.source.tracker,
                 project=dto.source.board,
-                field=dto.source.field_name,
+                field=dto.source.fieldName,
             ),
             condition=DefaultCondition(),
         )
@@ -100,13 +100,8 @@ class Rule:
             dst_issue, self.destination.field
         )
 
-    def sync(
-        self, src_issue: Issue, dst_issue: Issue
-    ) -> tuple[Issue, Issue]:
-        if (
-            not self.condition
-            or self.condition.condition_type == "default"
-        ):
+    def sync(self, src_issue: Issue, dst_issue: Issue) -> tuple[Issue, Issue]:
+        if not self.condition or self.condition.condition_type == "default":
             newer: Issue
             older: Issue
 

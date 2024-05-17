@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.core.db import DocumentDatabase
-from app.core.rule import RuleDTO
+from app.core.rule import RuleDTO, FieldFilter, RuleDirection
 from fastapi import Depends
 from app.core.db import get_db
 import app.api.crud as crud
@@ -16,8 +16,17 @@ def get_rules(db: DocumentDatabase = Depends(get_db)):
 
 
 @router.post("/add_rule")
-def add_rule(rule: RuleDTO, db: DocumentDatabase = Depends(get_db)):
-    return crud.add_rule(rule, db)
+def add_rule(
+    source: FieldFilter,
+    direction: str,
+    destination: FieldFilter,
+    db: DocumentDatabase = Depends(get_db),
+):
+    dto = RuleDTO(
+        source=source, direction=RuleDirection(direction), destination=destination
+    )
+    exit(-1)
+    return crud.add_rule(dto, db)
 
 
 @router.delete("/remove_rule")
