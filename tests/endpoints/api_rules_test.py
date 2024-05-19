@@ -1,10 +1,9 @@
 from fastapi.testclient import TestClient
 from app.api.endpoints.rules import router
-from fastapi import FastAPI
-from app.core.logger import logger
+from app.core.application import create_api
 from dotenv import load_dotenv
 
-api = FastAPI()
+api = create_api()
 api.include_router(router)
 
 client = TestClient(api)
@@ -17,16 +16,16 @@ TEST_RULES = [
         "source": {
             "tracker": "aaa",
             "board": "bbb",
-            "field_name": "ccc",
-            "field_val": "ddd",
-            "comp_op": "=",
+            "fieldName": "ccc",
+            "fieldVal": "ddd",
+            "compOp": "=",
         },
         "destination": {
             "tracker": "eee",
             "board": "fff",
-            "field_name": "ggg",
-            "field_val": "hhh",
-            "comp_op": "=",
+            "fieldName": "ggg",
+            "fieldVal": "hhh",
+            "compOp": "=",
         },
         "direction": "cmp",
     },
@@ -34,16 +33,16 @@ TEST_RULES = [
         "source": {
             "tracker": "aaa",
             "board": "bbb",
-            "field_name": "ccc",
-            "field_val": "ddd",
-            "comp_op": "=",
+            "fieldName": "ccc",
+            "fieldVal": "ddd",
+            "compOp": "=",
         },
         "destination": {
             "tracker": "eee",
             "board": "fff",
-            "field_name": "ggg",
-            "field_val": "hhh",
-            "comp_op": "=",
+            "fieldName": "ggg",
+            "fieldVal": "hhh",
+            "compOp": "=",
         },
         "direction": "std",
     },
@@ -51,16 +50,16 @@ TEST_RULES = [
         "source": {
             "tracker": "aaa",
             "board": "bbb",
-            "field_name": "ccc",
-            "field_val": "ddd",
-            "comp_op": "=",
+            "fieldName": "ccc",
+            "fieldVal": "ddd",
+            "compOp": "=",
         },
         "destination": {
             "tracker": "eee",
             "board": "fff",
-            "field_name": "ggg",
-            "field_val": "hhh",
-            "comp_op": "=",
+            "fieldName": "ggg",
+            "fieldVal": "hhh",
+            "compOp": "=",
         },
         "direction": "dts",
     },
@@ -99,6 +98,6 @@ def test_get_rules():
             created_rule["source"]["board"] == test_rule["source"]["board"]
         )
         assert (
-            created_rule["source"]["field_name"]
-            == test_rule["source"]["field_name"]
+            created_rule["source"]["fieldName"]
+            == test_rule["source"]["fieldName"]
         )

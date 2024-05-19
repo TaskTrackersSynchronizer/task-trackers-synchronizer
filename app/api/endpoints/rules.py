@@ -16,6 +16,7 @@ router = APIRouter(prefix="/api")
 def get_rules(db: DocumentDatabase = Depends(get_db)):
     return crud.get_rules(db)
 
+
 @dataclass
 class AddRuleRequestDTO:
     source: FieldFilter
@@ -33,12 +34,23 @@ def add_rule(
         direction=RuleDirection(req.direction),
         destination=req.destination,
     )
-    # exit(-1)
-    return crud.add_rule(dto, db)
+
+    crud.add_rule(dto, db)
+    return req
 
 
 @router.delete("/remove_rule")
-def remove_rule(rule: RuleDTO, db: DocumentDatabase = Depends(get_db)):
-    return crud.remove_rule(rule, db)
+def remove_rule(
+    req: AddRuleRequestDTO,
+    db: DocumentDatabase = Depends(get_db)
+):
+    dto = RuleDTO(
+        source=req.source,
+        direction=RuleDirection(req.direction),
+        destination=req.destination,
+    )
+
+    crud.remove_rule(dto, db)
+    return req
 
 # TODO: error on POSt when rule with  source / dest fields exist
