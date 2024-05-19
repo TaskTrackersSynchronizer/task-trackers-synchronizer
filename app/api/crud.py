@@ -33,7 +33,6 @@ def add_rule(rule_dto: RuleDTO, db: Database):
     if rule.source.tracker.lower() > rule.destination.tracker.lower():
         rule.source, rule.destination = rule.destination, rule.source
     db.add_row("rules", asdict(rule))
-    # TODO: return created rule
 
 
 def remove_rule(rule_dto: RuleDTO, db: Database):
